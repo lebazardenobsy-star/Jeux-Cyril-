@@ -1,6 +1,7 @@
 {
   "name": "CYRIL Slice",
   "short_name": "CYRIL",
+  "description": "Jeu de fruits CYRIL - Amuse-toi et teste tes réflexes"
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0d0d0d",
