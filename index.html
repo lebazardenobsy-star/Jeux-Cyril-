@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CYRIL Slice</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    touch-action: none;
+  }
+  #game {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+  }
+  #hud {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    z-index: 10;
+  }
+ .fruit {
+    position: absolute;
+    font-size: 55px;
+    user-select: none;
+    pointer-events: none;
+  }
+ .letter {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 26px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+  }
+ .slice {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    font-size: 25px;
+    pointer-events: none;
+    animation: sliceAnim 0.5s forwards;
+  }
+  @keyframes sliceAnim {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.5) translateY(-20px); }
+  }
+  #startScreen, #winScreen, #loseScreen {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    z-index: 20;
+  }
+  button {
+    padding: 15px 30px;
+    font-size: 20px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 10px;
+    background: #FF6B6B;
+    color: white;
+    cursor: pointer;
+  }
+  h1 { font-size: 40px; margin-bottom: 10px; }
+  #targetWord { font-size: 30px; letter-spacing: 10px; margin: 20px 0; }
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="hud">
+    <div>Score: <span id="score">0</span></div>
+    <div>Vies: <span id="lives">3</span></div>
+  </div>
+
+  <div id="startScreen">
+    <h1>CYRIL Slice</h1>
+    <p>Glisse ton doigt pour couper dans l'ordre :</p>
+    <div id="targetWord">C Y R I L</div>
+    <button onclick="startGame()">JOUER</button>
+  </div>
+
+  <div id="winScreen" style="display:none;">
+    <h1>🎉 Bravo!</h1>
+    <p>Tu as formé le mot CYRIL!</p>
+    <button onclick="restartGame()">Rejouer</button>
+  </div>
+
+  <div id="loseScreen" style="display:none;">
+    <h1>💀 Perdu!</h1>
+    <p>Essaie encore!</p>
+    <button onclick="restartGame()">Rejouer</button>
+  </div>
+</div>
+
+<script>
+const fruits = ['🍎', '🍌', '🍇', '🍊', '🍓', '🍑', '🍉', '🍍'];
+const letters = ['C', 'Y', 'R', 'I', 'L'];
+let score = 0;
+let lives = 3;
+let nextLetterIndex = 0;
+let gameRunning = false;
+let fruitInterval;
+let gameArea = document.getElementById('game');
+let isDragging = false;
+let lastX = 0, lastY = 0;
+
+function startGame() {
+  document.getElementById('startScreen').style.display = 'none';
+  gameRunning = true;
+  score = 0;
+  lives = 3;
+  nextLetterIndex = 0;
+  updateHUD();
+  fruitInterval = setInterval(createFruit, 1100);
+}
+
+// Gestion swipe souris et tactile
+gameArea.addEventListener('touchstart', e => { isDragging = true; updateLastPos(e.touches[0]); });
+gameArea.addEventListener('touchmove', e => { if(isDragging) checkSlice(e.touches[0]); });
+gameArea.addEventListener('touchend', () => isDragging = false);
+
+gameArea.addEventListener('mousedown', e => { isDragging = true; updateLastPos(e); });
+gameArea.addEventListener('mousemove', e => { if(isDragging) checkSlice(e); });
+gameArea.addEventListener('mouseup', () => isDragging = false);
+
+function updateLastPos(e) {
+  lastX = e.clientX;
+  lastY = e.clientY;
+}
+
+function createFruit() {
+  if (!gameRunning) return;
+
+  let fruit = document.createElement('div');
+  fruit.className = 'fruit';
+
+  let letter, emoji;
+  if (Math.random() < 0.7 && nextLetterIndex < letters.length) {
+    letter = letters[nextLetterIndex];
+  } else {
+    letter = letters[Math.floor(Math.random() * letters.length)];
+  }
+  emoji = fruits[Math.floor(Math.random() * fruits.length)];
+
+  fruit.innerHTML = `${emoji}<div class="letter">${letter}</div>`;
+  fruit.dataset.letter = letter;
+  fruit.dataset.cut = "false";
+
+  fruit.style.left = Math.random() * (window.innerWidth - 60) + 'px';
+  fruit.style.top = '-60px';
+
+  gameArea.appendChild(fruit);
+
+  let fallSpeed = 2.5 + Math.random() * 2;
+  let pos = -60;
+  let fall = setInterval(() => {
+    if (!gameRunning || fruit.dataset.cut === "true") {
+      clearInterval(fall);
+      return;
+    }
+    pos += fallSpeed;
+    fruit.style.top = pos + 'px';
+
+    if (pos > window.innerHeight) {
+      clearInterval(fall);
+      fruit.remove();
+      if (letter === letters[nextLetterIndex]) {
+        loseLife();
+      }
+    }
+  }, 20);
+}
+
+function checkSlice(e) {
+  if (!gameRunning) return;
+  let x = e.clientX;
+  let y = e.clientY;
+
+  document.querySelectorAll('.fruit').forEach(fruit => {
+    if (fruit.dataset.cut === "true") return;
+    let rect = fruit.getBoundingClientRect();
+
+    // Si la ligne du doigt passe dans le fruit
+    if (x > rect.left && x < rect.right && y > rect.top && y < rect.bottom) {
+      sliceFruit(fruit);
+    }
+  });
+
+  lastX = x;
+  lastY = y;
+}
+
+function sliceFruit(fruit) {
+  fruit.dataset.cut = "true";
+  let letter = fruit.dataset.letter;
+  let rect = fruit.getBoundingClientRect();
+
+  // Effet de coupe
+  let slice = document.createElement('div');
+  slice.className = 'slice';
+  slice.textContent = '✂️';
+  slice.style.left = rect.left + 'px';
+  slice.style.top = rect.top + 'px';
+  gameArea.appendChild(slice);
+  setTimeout(() => slice.remove(), 500);
+
+  if (letter === letters[nextLetterIndex]) {
+    score += 10;
+    nextLetterIndex++;
+    updateHUD();
+    if (nextLetterIndex >= letters.length) {
+      winGame();
+    }
+  } else {
+    loseLife();
+  }
+
+  fruit.remove();
+}
+
+function loseLife() {
+  lives--;
+  updateHUD();
+  if (lives <= 0) {
+    loseGame();
+  }
+}
+
+function updateHUD() {
+  document.getElementById('score').textContent = score;
+  document.getElementById('lives').textContent = lives;
+}
+
+function winGame() {
+  gameRunning = false;
+  clearInterval(fruitInterval);
+  document.getElementById('winScreen').style.display = 'flex';
+}
+
+function loseGame() {
+  gameRunning = false;
+  clearInterval(fruitInterval);
+  document.getElementById('loseScreen').style.display = 'flex';
+}
+
+function restartGame() {
+  document.getElementById('winScreen').style.display = 'none';
+  document.getElementById('loseScreen').style.display = 'none';
+  document.querySelectorAll('.fruit,.slice').forEach(f => f.remove());
+  document.getElementById('startScreen').style.display = 'flex';
+}
+</script>
+</body>
+</html>
