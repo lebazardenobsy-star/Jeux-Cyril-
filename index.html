@@ -5,96 +5,125 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CYRIL Slice</title>
 <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-    touch-action: none;
-<ul style="font-size: 2em; font-weight: bold; list-style: none; margin: 0; padding: 0; text-align:center;">
-  <li>Vanessa</li>
-  <li>kelvin</li>
-  <li>RAÏSA</li>
-  <li>ANITA</li>
-  <li>SCOLA</li>
-  <li>BRUL</li>
-  <li>ERNEST</li>
-  <li>JENOVIC</li>
-</ul>
-  }
-  #game {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-  }
-  #hud {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    display: flex;
-    justify-content: space-between;
-    font-size: 50px;
-    font-weight: bold;
-    color: #fff;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    z-index: 10;
-  }
- .fruit {
-    position: absolute;
-    font-size: 150px; /* Agrandi */
-    user-select: none;
-    pointer-events: none;
-  }
- .letter {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 72px;  /* Agrandi */
-    font-weight: bold;
-    color: white;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-  }
- .slice {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    font-size: 50px;
-    pointer-events: none;
-    animation: sliceAnim 0.5s forwards;
-  }
-   @keyframes sliceAnim {
-    0% { opacity: 1; transform: scale(1); }
-    100% { opacity: 0; transform: scale(1.5) translateY(-20px); }
-  }
-   #startScreen, #winScreen, #loseScreen {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    text-align: center;
-    z-index: 20;
-  }
-  button {
-    padding: 15px 30px;
-    font-size: 70px;
-    margin-top: 20px;
-    border: none;
-    border-radius: 10px;
-    background: #FF6B6B;
-    color: white;
-    cursor: pointer;
-  }
-  h1 { font-size: 40px; margin-bottom: 10px; }
-  #targetWord { font-size: 30px; letter-spacing: 10px; margin: 20px 0; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+  touch-action: none;
+}
+
+#game {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* HUD Score et Vies */
+#hud {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 50px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  z-index: 10;
+}
+
+/* Fruits */
+.fruit {
+  position: absolute;
+  font-size: 150px;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Lettre sur le fruit */
+.letter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 72px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+}
+
+/* Effet de coupe */
+.slice {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  font-size: 50px;
+  pointer-events: none;
+  animation: sliceAnim 0.5s forwards;
+}
+
+@keyframes sliceAnim {
+ 0% { opacity: 1; transform: scale(1); }
+ 100% { opacity: 0; transform: scale(1.5) translateY(-20px); }
+}
+
+/* Ecrans Menu, Win, Lose */
+#startScreen, #winScreen, #loseScreen {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+  z-index: 20;
+  padding: 20px;
+}
+
+#startScreen h1, #winScreen h1, #loseScreen h1 {
+  font-size: 90px;
+  margin-bottom: 20px;
+  text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+}
+
+#startScreen p, #winScreen p, #loseScreen p {
+  font-size: 40px;
+  margin-bottom: 30px;
+}
+
+/* Boutons */
+button {
+  padding: 30px 60px;
+  font-size: 48px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 15px;
+  background: #FF6B6B;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+/* Mot à former */
+#targetWord {
+  font-size: 60px;
+  letter-spacing: 20px;
+  margin: 30px 0;
+  font-weight: bold;
+}
 </style>
-   <link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#ff3b30">
 <link rel="apple-touch-icon" href="icon-192.png">
 <script>
@@ -119,7 +148,7 @@ if('serviceWorker' in navigator){
 
   <div id="winScreen" style="display:none;">
     <h1>🎉 Bravo!</h1>
-    <p>Tu as formé le mot !</p>
+    <p>Tu as formé le mot!</p>
     <button onclick="restartGame()">Rejouer</button>
   </div>
 
@@ -133,7 +162,6 @@ if('serviceWorker' in navigator){
 <script>
 const fruits = ['🍎', '🍌', '🍇', '🍊', '🍓', '🍑', '🍉', '🍍'];
 
-// Liste des prénoms à couper
 const names = [
   'CYRIL', 'KELVIN', 'NDIMBA', 'VANESSA', 'ANITA',
   'RAÏSA', 'BRUL', 'HERNEST', 'SCOLA', 'JEANNIEL'
@@ -147,7 +175,6 @@ let gameRunning = false;
 let fruitInterval;
 let gameArea = document.getElementById('game');
 let isDragging = false;
-let lastX = 0, lastY = 0;
 
 function showCurrentWordOnTitle() {
   document.getElementById('targetWord').textContent = letters.join(' ');
@@ -163,18 +190,13 @@ function startGame() {
   fruitInterval = setInterval(createFruit, 1100);
 }
 
-gameArea.addEventListener('touchstart', e => { isDragging = true; updateLastPos(e.touches[0]); });
+gameArea.addEventListener('touchstart', e => { isDragging = true; });
 gameArea.addEventListener('touchmove', e => { if(isDragging) checkSlice(e.touches[0]); });
 gameArea.addEventListener('touchend', () => isDragging = false);
 
-gameArea.addEventListener('mousedown', e => { isDragging = true; updateLastPos(e); });
+gameArea.addEventListener('mousedown', e => { isDragging = true; });
 gameArea.addEventListener('mousemove', e => { if(isDragging) checkSlice(e); });
 gameArea.addEventListener('mouseup', () => isDragging = false);
-
-function updateLastPos(e) {
-  lastX = e.clientX;
-  lastY = e.clientY;
-}
 
 function createFruit() {
   if (!gameRunning) return;
@@ -186,7 +208,6 @@ function createFruit() {
   if (Math.random() < 0.7 && nextLetterIndex < letters.length) {
     letter = letters[nextLetterIndex];
   } else {
-    // Lettre aléatoire de ce prénom
     letter = letters[Math.floor(Math.random() * letters.length)];
   }
   emoji = fruits[Math.floor(Math.random() * fruits.length)];
@@ -195,13 +216,13 @@ function createFruit() {
   fruit.dataset.letter = letter;
   fruit.dataset.cut = "false";
 
-  fruit.style.left = Math.random() * (window.innerWidth - 100) + 'px'; // ajusté pour fruits plus gros
-  fruit.style.top = '-100px';
+  fruit.style.left = Math.random() * (window.innerWidth - 160) + 'px';
+  fruit.style.top = '-160px';
 
   gameArea.appendChild(fruit);
 
   let fallSpeed = 2.5 + Math.random() * 2;
-  let pos = -100;
+  let pos = -160;
   let fall = setInterval(() => {
     if (!gameRunning || fruit.dataset.cut === "true") {
       clearInterval(fall);
@@ -233,9 +254,6 @@ function checkSlice(e) {
       sliceFruit(fruit);
     }
   });
-
-  lastX = x;
-  lastY = y;
 }
 
 function sliceFruit(fruit) {
@@ -285,8 +303,7 @@ function winGame() {
   currentNameIndex = (currentNameIndex + 1) % names.length;
   letters = names[currentNameIndex].split('');
   showCurrentWordOnTitle();
-  // Affiche la victoire avec le prénom correct
-  document.querySelector('#winScreen p').textContent = "Tu as formé le mot " + names[(currentNameIndex - 1 + names.length)%names.length] + " !";
+  document.querySelector('#winScreen p').textContent = "Tu as formé le mot " + names[(currentNameIndex - 1 + names.length)%names.length] + "!";
 }
 
 function loseGame() {
@@ -302,6 +319,7 @@ function restartGame() {
   document.getElementById('startScreen').style.display = 'flex';
   showCurrentWordOnTitle();
 }
+
 showCurrentWordOnTitle();
 </script>
 </body>
