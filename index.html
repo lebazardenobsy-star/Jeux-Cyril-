@@ -2,325 +2,383 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<title>Ludo bet</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CYRIL Slice</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+    * { box-sizing: border-box; }
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+    color: white;
+  }
 
-body {
-  background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
-  font-family: Arial, sans-serif;
-  overflow: hidden;
-  touch-action: none;
-}
+  #menu {
+    margin-top: 50px;
+  }
 
-#game {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-}
+  #menu h1 {
+    font-size: 48px;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  }
 
-/* HUD Score et Vies */
-#hud {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  right: 20px;
-  display: flex;
-  justify-content: space-between;
-  font-size: 50px;
-  font-weight: bold;
-  color: #fff;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-  z-index: 10;
-}
+  #menu p {
+    font-size: 18px;
+    margin-bottom: 40px;
+    opacity: 0.9;
+  }
 
-/* Fruits */
-.fruit {
-  position: absolute;
-  font-size: 150px;
-  user-select: none;
-  pointer-events: none;
-}
+.mode-btn {
+    display: block;
+    width: 90%;
+    max-width: 350px;
+    margin: 20px auto;
+    padding: 25px;
+    font-size: 22px;
+    font-weight: bold;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
 
-/* Lettre sur le fruit */
-.letter {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 72px;
-  font-weight: bold;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-}
+.mode-btn:hover {
+    transform: scale(1.05);
+  }
 
-/* Effet de coupe */
-.slice {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  font-size: 50px;
-  pointer-events: none;
-  animation: sliceAnim 0.5s forwards;
-}
+.btn-friends {
+    background: linear-gradient(135deg, #00b894, #00cec9);
+    color: white;
+  }
 
-@keyframes sliceAnim {
- 0% { opacity: 1; transform: scale(1); }
- 100% { opacity: 0; transform: scale(1.5) translateY(-20px); }
-}
+.btn-bot {
+    background: linear-gradient(135deg, #fd79a8, #e84393);
+    color: white;
+  }
 
-/* Ecrans Menu, Win, Lose */
-#startScreen, #winScreen, #loseScreen {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.7);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  text-align: center;
-  z-index: 20;
-  padding: 20px;
-}
+  #game {
+    display: none;
+  }
 
-#startScreen h1, #winScreen h1, #loseScreen h1 {
-  font-size: 90px;
-  margin-bottom: 20px;
-  text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
-}
+  #board {
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    grid-template-rows: repeat(15, 1fr);
+    width: 95vw;
+    max-width: 600px;
+    height: 95vw;
+    max-height: 600px;
+    margin: 15px auto;
+    background: white;
+    border: 3px solid #333;
+  }
 
-#startScreen p, #winScreen p, #loseScreen p {
-  font-size: 40px;
-  margin-bottom: 30px;
-}
+.cell {
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-size: 10px;
+  }
 
-/* Boutons */
-button {
-  padding: 30px 60px;
-  font-size: 48px;
-  margin-top: 20px;
-  border: none;
-  border-radius: 15px;
-  background: #FF6B6B;
-  color: white;
-  cursor: pointer;
-  font-weight: bold;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
+.home-red { background: #ff6b6b; }
+.home-blue { background: #4dabf7; }
+.home-green { background: #51cf66; }
+.home-yellow { background: #ffd43b; }
+.safe { background: #ffe066; }
+.path { background: #fff; }
 
-button:active {
-  transform: scale(0.95);
-}
+.token {
+    width: 65%;
+    height: 65%;
+    border-radius: 50%;
+    border: 2px solid #333;
+    position: absolute;
+  }
 
-/* Mot à former */
-#targetWord {
-  font-size: 60px;
-  letter-spacing: 20px;
-  margin: 30px 0;
-  font-weight: bold;
-}
+.red-token { background: #d63031; }
+.blue-token { background: #0984e3; }
+.green-token { background: #00b894; }
+.yellow-token { background: #fdcb6e; }
+
+.game-btn {
+    padding: 12px 24px;
+    font-size: 16px;
+    background: white;
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 5px;
+    font-weight: bold;
+  }
+
+.game-btn:active { transform: scale(0.95); }
+.game-btn:disabled { background: #ccc; }
+
+  #info { font-size: 18px; margin: 10px; font-weight: bold; }
+  #dice { font-size: 24px; margin: 10px; }
+.turn-red { color: #ff6b6b; }
+.turn-blue { color: #4dabf7; }
+.turn-green { color: #51cf66; }
+.turn-yellow { color: #ffd43b; }
 </style>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#ff3b30">
-<link rel="apple-touch-icon" href="icon-192.png">
-<script>
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js');
-}
-</script>
 </head>
 <body>
+
+<div id="menu">
+  <h1>🎲 LUDO</h1>
+  <p>Choisis ton mode de jeu</p>
+  <button class="mode-btn btn-friends" onclick="startGame('friends')">
+    👥 Jouer avec des amis<br>
+    <small style="font-size: 14px; font-weight: normal;">4 joueurs sur le même appareil</small>
+  </button>
+  <button class="mode-btn btn-bot" onclick="startGame('bot')">
+    🤖 Jouer vs Robots<br>
+    <small style="font-size: 14px; font-weight: normal;">Joue seul contre 3 robots</small>
+  </button>
+</div>
+
 <div id="game">
-  <div id="hud">
-    <div>Score: <span id="score">0</span></div>
-    <div>Vies: <span id="lives">3</span></div>
-  </div>
-
-  <div id="startScreen">
-    <h1>CYRIL Slice</h1>
-    <p>Glisse ton doigt pour couper dans l'ordre :</p>
-    <div id="targetWord">C Y R I L</div>
-    <button onclick="startGame()">JOUER</button>
-  </div>
-
-  <div id="winScreen" style="display:none;">
-    <h1>🎉 Bravo!</h1>
-    <p>Tu as formé le mot!</p>
-    <button onclick="restartGame()">Rejouer</button>
-  </div>
-
-  <div id="loseScreen" style="display:none;">
-    <h1>💀 Perdu!</h1>
-    <p>Essaie encore!</p>
-    <button onclick="restartGame()">Rejouer</button>
-  </div>
+  <h2>🎲 Ludo</h2>
+  <div id="info" class="turn-red">Tour: Rouge</div>
+  <div id="dice">Dé: -</div>
+  <button class="game-btn" id="rollBtn" onclick="rollDice()">Lancer le dé</button>
+  <button class="game-btn" onclick="backToMenu()">Menu</button>
+  <div id="board"></div>
 </div>
 
 <script>
-const fruits = ['🍎', '🍌', '🍇', '🍊', '🍓', '🍑', '🍉', '🍍'];
+let gameMode = 'bot';
+let currentPlayer = 0;
+let diceValue = 0;
+let gameOver = false;
+let isBotTurn = false;
 
-const names = [
-  'CYRIL', 'KELVIN', 'NDIMBA', 'VANESSA', 'ANITA',
-  'RAÏSA', 'BRUL', 'HERNEST', 'SCOLA', 'JEANNIEL'
-];
-let currentNameIndex = 0;
-let letters = names[currentNameIndex].split('');
-let score = 0;
-let lives = 3;
-let nextLetterIndex = 0;
-let gameRunning = false;
-let fruitInterval;
-let gameArea = document.getElementById('game');
-let isDragging = false;
+const players = ['red', 'blue', 'green', 'yellow'];
+const playerColors = {
+  red: 'red-token',
+  blue: 'blue-token',
+  green: 'green-token',
+  yellow: 'yellow-token'
+};
 
-function showCurrentWordOnTitle() {
-  document.getElementById('targetWord').textContent = letters.join(' ');
+let positions = {
+  red: [0, 0, 0, 0],
+  blue: [0, 0, 0, 0],
+  green: [0, 0, 0, 0],
+  yellow: [0, 0, 0, 0]
+};
+
+const startPos = { red: 1, blue: 15, green: 29, yellow: 43 };
+
+function startGame(mode) {
+  gameMode = mode;
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('game').style.display = 'block';
+  resetGame();
+  createBoard();
+  drawTokens();
 }
 
-function startGame() {
-  document.getElementById('startScreen').style.display = 'none';
-  gameRunning = true;
-  score = 0;
-  lives = 3;
-  nextLetterIndex = 0;
-  updateHUD();
-  fruitInterval = setInterval(createFruit, 1100);
+function backToMenu() {
+  document.getElementById('menu').style.display = 'block';
+  document.getElementById('game').style.display = 'none';
 }
 
-gameArea.addEventListener('touchstart', e => { isDragging = true; });
-gameArea.addEventListener('touchmove', e => { if(isDragging) checkSlice(e.touches[0]); });
-gameArea.addEventListener('touchend', () => isDragging = false);
+function createBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  for(let i = 0; i < 225; i++) {
+    let cell = document.createElement('div');
+    cell.className = 'cell path';
+    cell.id = 'cell-' + i;
 
-gameArea.addEventListener('mousedown', e => { isDragging = true; });
-gameArea.addEventListener('mousemove', e => { if(isDragging) checkSlice(e); });
-gameArea.addEventListener('mouseup', () => isDragging = false);
+    if(i >= 0 && i < 36 && i % 15 < 6 && Math.floor(i/15) < 6) cell.classList.add('home-red');
+    if(i >= 0 && i < 90 && i % 15 >= 9 && Math.floor(i/15) < 6) cell.classList.add('home-blue');
+    if(i >= 135 && i < 225 && i % 15 < 6 && Math.floor(i/15) >= 9) cell.classList.add('home-green');
+    if(i >= 135 && i < 225 && i % 15 >= 9 && Math.floor(i/15) >= 9) cell.classList.add('home-yellow');
 
-function createFruit() {
-  if (!gameRunning) return;
-
-  let fruit = document.createElement('div');
-  fruit.className = 'fruit';
-
-  let letter, emoji;
-  if (Math.random() < 0.7 && nextLetterIndex < letters.length) {
-    letter = letters[nextLetterIndex];
-  } else {
-    letter = letters[Math.floor(Math.random() * letters.length)];
+    board.appendChild(cell);
   }
-  emoji = fruits[Math.floor(Math.random() * fruits.length)];
 
-  fruit.innerHTML = `${emoji}<div class="letter">${letter}</div>`;
-  fruit.dataset.letter = letter;
-  fruit.dataset.cut = "false";
-
-  fruit.style.left = Math.random() * (window.innerWidth - 160) + 'px';
-  fruit.style.top = '-160px';
-
-  gameArea.appendChild(fruit);
-
-  let fallSpeed = 2.5 + Math.random() * 2;
-  let pos = -160;
-  let fall = setInterval(() => {
-    if (!gameRunning || fruit.dataset.cut === "true") {
-      clearInterval(fall);
-      return;
-    }
-    pos += fallSpeed;
-    fruit.style.top = pos + 'px';
-
-    if (pos > window.innerHeight) {
-      clearInterval(fall);
-      fruit.remove();
-      if (letter === letters[nextLetterIndex]) {
-        loseLife();
+  for(let i = 1; i <= 56; i++) {
+    let pos = getPathPosition(i);
+    if(pos >= 0) {
+      document.getElementById('cell-' + pos).classList.add('path');
+      if([1,15,29,43].includes(i)) {
+        document.getElementById('cell-' + pos).classList.add('safe');
       }
     }
-  }, 20);
+  }
 }
 
-function checkSlice(e) {
-  if (!gameRunning) return;
-  let x = e.clientX;
-  let y = e.clientY;
+function getPathPosition(step) {
+  if(step < 1 || step > 56) return -1;
+  if(step <= 14) return 6 + step;
+  if(step <= 28) return 6*15 + (14 - step + 14);
+  if(step <= 42) return (42 - step + 28)*15 + 6;
+  return (step - 42)*15 + 6;
+}
 
-  document.querySelectorAll('.fruit').forEach(fruit => {
-    if (fruit.dataset.cut === "true") return;
-    let rect = fruit.getBoundingClientRect();
+function drawTokens() {
+  document.querySelectorAll('.token').forEach(t => t.remove());
 
-    if (x > rect.left && x < rect.right && y > rect.top && y < rect.bottom) {
-      sliceFruit(fruit);
-    }
+  players.forEach(player => {
+    positions[player].forEach((pos, idx) => {
+      if(pos > 0 && pos <= 56) {
+        let boardPos = getPathPosition((pos + startPos[player] - 1) % 56 + 1);
+        if(boardPos >= 0) {
+          let cell = document.getElementById('cell-' + boardPos);
+          if(cell) {
+            let token = document.createElement('div');
+            token.className = 'token ' + playerColors[player];
+            cell.appendChild(token);
+          }
+        }
+      } else if(pos === 0) {
+        let homeCell = getHomeCell(player, idx);
+        if(homeCell) homeCell.appendChild(createToken(player));
+      }
+    });
   });
 }
 
-function sliceFruit(fruit) {
-  fruit.dataset.cut = "true";
-  let letter = fruit.dataset.letter;
-  let rect = fruit.getBoundingClientRect();
+function getHomeCell(player, idx) {
+  let positions = {
+    red: [16, 17, 31, 32],
+    blue: [73, 74, 88, 89],
+    green: [150, 151, 165, 166],
+    yellow: [207, 208, 222, 223]
+  };
+  return document.getElementById('cell-' + positions[player][idx]);
+}
 
-  let slice = document.createElement('div');
-  slice.className = 'slice';
-  slice.textContent = '✂️';
-  slice.style.left = rect.left + 'px';
-  slice.style.top = rect.top + 'px';
-  gameArea.appendChild(slice);
-  setTimeout(() => slice.remove(), 500);
+function createToken(player) {
+  let token = document.createElement('div');
+  token.className = 'token ' + playerColors[player];
+  return token;
+}
 
-  if (letter === letters[nextLetterIndex]) {
-    score += 10;
-    nextLetterIndex++;
-    updateHUD();
-    if (nextLetterIndex >= letters.length) {
-      winGame();
+function rollDice() {
+  if(gameOver || isBotTurn) return;
+
+  diceValue = Math.floor(Math.random() * 6) + 1;
+  document.getElementById('dice').textContent = 'Dé: ' + diceValue;
+  document.getElementById('rollBtn').disabled = true;
+
+  let player = players[currentPlayer];
+  moveToken(player, diceValue);
+}
+
+function moveToken(player, dice) {
+  let moved = false;
+  let playerPos = positions[player];
+
+  for(let i = 0; i < 4; i++) {
+    let pos = playerPos[i];
+
+    if(pos === 0 && dice === 6) {
+      playerPos[i] = 1;
+      moved = true;
+      break;
+    } else if(pos > 0 && pos < 56) {
+      playerPos[i] = Math.min(pos + dice, 56);
+      moved = true;
+      break;
     }
+  }
+
+  drawTokens();
+  checkWin();
+
+  if(!moved && dice!== 6) {
+    nextPlayer();
+  } else if(dice!== 6) {
+    nextPlayer();
   } else {
-    loseLife();
-  }
-
-  fruit.remove();
-}
-
-function loseLife() {
-  lives--;
-  updateHUD();
-  if (lives <= 0) {
-    loseGame();
+    if(gameMode === 'friends' || player === 'red') {
+      document.getElementById('rollBtn').disabled = false;
+    } else {
+      setTimeout(botTurn, 800);
+    }
   }
 }
 
-function updateHUD() {
-  document.getElementById('score').textContent = score;
-  document.getElementById('lives').textContent = lives;
+function nextPlayer() {
+  currentPlayer = (currentPlayer + 1) % 4;
+  let player = players[currentPlayer];
+
+  let playerName = player.charAt(0).toUpperCase() + player.slice(1);
+  document.getElementById('info').textContent = 'Tour: ' + playerName;
+  document.getElementById('info').className = 'turn-' + player;
+
+  if(gameMode === 'bot' && player!== 'red') {
+    isBotTurn = true;
+    setTimeout(botTurn, 800);
+  } else {
+    isBotTurn = false;
+    document.getElementById('rollBtn').disabled = false;
+    if(gameMode === 'bot') {
+      document.getElementById('info').textContent = 'Tour: Rouge - C\'est ton tour';
+    }
+  }
 }
 
-function winGame() {
-  gameRunning = false;
-  clearInterval(fruitInterval);
-  document.getElementById('winScreen').style.display = 'flex';
-  currentNameIndex = (currentNameIndex + 1) % names.length;
-  letters = names[currentNameIndex].split('');
-  showCurrentWordOnTitle();
-  document.querySelector('#winScreen p').textContent = "Tu as formé le mot " + names[(currentNameIndex - 1 + names.length)%names.length] + "!";
+function botTurn() {
+  if(gameOver) return;
+
+  diceValue = Math.floor(Math.random() * 6) + 1;
+  document.getElementById('dice').textContent = 'Dé: ' + diceValue;
+
+  let player = players[currentPlayer];
+  moveToken(player, diceValue);
 }
 
-function loseGame() {
-  gameRunning = false;
-  clearInterval(fruitInterval);
-  document.getElementById('loseScreen').style.display = 'flex';
+function checkWin() {
+  let player = players[currentPlayer];
+  if(positions[player].every(p => p === 56)) {
+    let msg;
+    if(gameMode === 'bot' && player === 'red') {
+      msg = '🎉 Tu as gagné!';
+    } else if(gameMode === 'bot') {
+      msg = '😢 ' + player.charAt(0).toUpperCase() + player.slice(1) + ' a gagné!';
+    } else {
+      msg = '🎉 ' + player.charAt(0).toUpperCase() + player.slice(1) + ' a gagné!';
+    }
+    setTimeout(() => alert(msg), 300);
+    gameOver = true;
+  }
 }
 
-function restartGame() {
-  document.getElementById('winScreen').style.display = 'none';
-  document.getElementById('loseScreen').style.display = 'none';
-  document.querySelectorAll('.fruit,.slice').forEach(f => f.remove());
-  document.getElementById('startScreen').style.display = 'flex';
-  showCurrentWordOnTitle();
-}
+function resetGame() {
+  positions = {
+    red: [0, 0, 0, 0],
+    blue: [0, 0, 0, 0],
+    green: [0, 0, 0, 0],
+    yellow: [0, 0, 0, 0]
+  };
+  currentPlayer = 0;
+  diceValue = 0;
+  gameOver = false;
+  isBotTurn = false;
+  document.getElementById('dice').textContent = 'Dé: -';
 
-showCurrentWordOnTitle();
+  if(gameMode === 'bot') {
+    document.getElementById('info').textContent = 'Tour: Rouge - C\'est ton tour';
+  } else {
+    document.getElementById('info').textContent = 'Tour: Rouge';
+  }
+  document.getElementById('info').className = 'turn-red';
+  document.getElementById('rollBtn').disabled = false;
+}
 </script>
+
 </body>
 </html>
