@@ -131,7 +131,64 @@
 </style>
 </head>
 <body>
+<div id="wallet-bar" style="display:flex; justify-content:center; align-items:center; gap:15px; 
+     background:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+  
+  <span style="font-weight:bold;">Solde: <span id="solde">0</span> FC</span>
+  
+  <button onclick="ouvrirDepot()" style="padding:6px 12px; background:#e31b23; color:white; 
+          border:none; border-radius:6px; cursor:pointer; font-weight:bold;">
+    Dépôt
+  </button>
+</div>
 
+<!-- Popup Dépôt -->
+<div id="popupDepot" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+     background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+  <div style="background:white; padding:20px; border-radius:10px; width:300px; text-align:center;">
+    <h3>Déposer via Airtel Money</h3>
+    <input type="number" id="montantDepot" placeholder="Montant en FC" min="1000" 
+           style="width:90%; padding:8px; margin:10px 0;">
+    <p style="font-size:13px;">L'argent sera envoyé au <b>0970709671</b></p>
+    <button onclick="payerAirtel()" style="padding:10px; width:100%; background:#e31b23; 
+            color:white; border:none; border-radius:6px;">Payer maintenant</button>
+    <button onclick="fermerDepot()" style="margin-top:8px; background:none; border:none; color:#555;">
+      Annuler
+    </button>
+  </div>
+</div>
+
+<script>
+function ouvrirDepot() {
+  document.getElementById('popupDepot').style.display = 'flex';
+}
+
+function fermerDepot() {
+  document.getElementById('popupDepot').style.display = 'none';
+}
+
+function payerAirtel() {
+  let montant = document.getElementById('montantDepot').value;
+  if(montant < 1000) {
+    alert("Montant minimum 1000 FC");
+    return;
+  }
+  
+  // OPTION 1 : Lien USSD direct - l'utilisateur compose lui-même
+  window.location.href = `tel:*141*1*1*0970709671*${montant}#`;
+  
+  // OPTION 2 : API Airtel Money - nécessite backend
+  // fetch('/api/airtel-deposit', {method:'POST', body:JSON.stringify({amount:montant, phone:'0970709671'})})
+  
+  alert(`Tu vas payer ${montant} FC vers 0970709671. Valide sur ton téléphone.`);
+  fermerDepot();
+}
+
+// Mets à jour le solde après paiement réussi depuis ton backend
+function majSolde(nouveauSolde) {
+  document.getElementById('solde').innerText = nouveauSolde;
+}
+     </script>
 <div id="menu">
   <h1>🎲 LUDO</h1>
   <p>Choisis ton mode de jeu</p>
