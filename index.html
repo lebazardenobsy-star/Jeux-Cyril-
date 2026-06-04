@@ -2,440 +2,298 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Ludo bet</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CYRIL CRASH</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <style>
-    * { box-sizing: border-box; }
-  body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    text-align: center;
-    margin: 0;
-    padding: 20px;
-    min-height: 100vh;
-    color: white;
-  }
-
-  #menu {
-    margin-top: 50px;
-  }
-
-  #menu h1 {
-    font-size: 48px;
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-  }
-
-  #menu p {
-    font-size: 18px;
-    margin-bottom: 40px;
-    opacity: 0.9;
-  }
-
-.mode-btn {
-    display: block;
-    width: 90%;
-    max-width: 350px;
-    margin: 20px auto;
-    padding: 25px;
-    font-size: 22px;
-    font-weight: bold;
-    border: none;
-    border-radius: 15px;
-    cursor: pointer;
-    transition: transform 0.2s;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  }
-
-.mode-btn:hover {
-    transform: scale(1.05);
-  }
-
-.btn-friends {
-    background: linear-gradient(135deg, #00b894, #00cec9);
-    color: white;
-  }
-
-.btn-bot {
-    background: linear-gradient(135deg, #fd79a8, #e84393);
-    color: white;
-  }
-
-  #game {
-    display: none;
-  }
-
-  #board {
-    display: grid;
-    grid-template-columns: repeat(15, 1fr);
-    grid-template-rows: repeat(15, 1fr);
-    width: 95vw;
-    max-width: 600px;
-    height: 95vw;
-    max-height: 600px;
-    margin: 15px auto;
-    background: white;
-    border: 3px solid #333;
-  }
-
-.cell {
-    border: 1px solid #ddd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    font-size: 10px;
-  }
-
-.home-red { background: #ff6b6b; }
-.home-blue { background: #4dabf7; }
-.home-green { background: #51cf66; }
-.home-yellow { background: #ffd43b; }
-.safe { background: #ffe066; }
-.path { background: #fff; }
-
-.token {
-    width: 65%;
-    height: 65%;
-    border-radius: 50%;
-    border: 2px solid #333;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; background: #87CEEB; overflow: hidden; touch-action: none; }
+  #gameCanvas { display: block; margin: 0 auto; background: #87CEEB; }
+  #title {
     position: absolute;
-  }
-
-.red-token { background: #d63031; }
-.blue-token { background: #0984e3; }
-.green-token { background: #00b894; }
-.yellow-token { background: #fdcb6e; }
-
-.game-btn {
-    padding: 12px 24px;
-    font-size: 16px;
-    background: white;
-    color: #333;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin: 5px;
+    top: 15px;
+    width: 100%;
+    text-align: center;
+    font-size: 42px;
     font-weight: bold;
+    color: #FFD700;
+    text-shadow: 4px 4px 0px #FF4500;
+    letter-spacing: 2px;
   }
-
-.game-btn:active { transform: scale(0.95); }
-.game-btn:disabled { background: #ccc; }
-
-  #info { font-size: 18px; margin: 10px; font-weight: bold; }
-  #dice { font-size: 24px; margin: 10px; }
-.turn-red { color: #ff6b6b; }
-.turn-blue { color: #4dabf7; }
-.turn-green { color: #51cf66; }
-.turn-yellow { color: #ffd43b; }
+  #hud {
+    position: absolute;
+    top: 70px;
+    width: 100%;
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px black;
+  }
+  #startScreen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    background: rgba(0,0,0,0.8);
+    padding: 30px;
+    border-radius: 20px;
+    max-width: 350px;
+  }
 </style>
 </head>
 <body>
-<div id="wallet-bar" style="display:flex; justify-content:center; align-items:center; gap:15px; 
-     background:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-  
-  <span style="font-weight:bold;">Solde: <span id="solde">0</span> FC</span>
-  
-  <button onclick="ouvrirDepot()" style="padding:6px 12px; background:#e31b23; color:white; 
-          border:none; border-radius:6px; cursor:pointer; font-weight:bold;">
-    Dépôt
-  </button>
-</div>
 
-<!-- Popup Dépôt -->
-<div id="popupDepot" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
-     background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
-  <div style="background:white; padding:20px; border-radius:10px; width:300px; text-align:center;">
-    <h3>Déposer via Airtel Money</h3>
-    <input type="number" id="montantDepot" placeholder="Montant en FC" min="1000" 
-           style="width:90%; padding:8px; margin:10px 0;">
-    <p style="font-size:13px;">L'argent sera envoyé au <b>0970709671</b></p>
-    <button onclick="payerAirtel()" style="padding:10px; width:100%; background:#e31b23; 
-            color:white; border:none; border-radius:6px;">Payer maintenant</button>
-    <button onclick="fermerDepot()" style="margin-top:8px; background:none; border:none; color:#555;">
-      Annuler
-    </button>
-  </div>
+<div id="title">CYRIL CRASH</div>
+<div id="hud">Score: 0 | Phase: FORÊT</div>
+<canvas id="gameCanvas"></canvas>
+
+<div id="startScreen">
+  <h2>✈️ CYRIL CRASH ✈️</h2>
+  <p>0-500 pts: Forêt facile - grand passage</p>
+  <p>500+ pts: Ciel + pluie + tire sur avions</p>
+  <p>1000 pts: Atterrissage + voiture minée 🚗💣</p>
+  <p style="margin-top:15px; font-size:14px;">Tape gauche: Monter<br>Tape droite: Tirer/Avancer</p>
 </div>
 
 <script>
-function ouvrirDepot() {
-  document.getElementById('popupDepot').style.display = 'flex';
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const hudDiv = document.getElementById('hud');
+const startScreen = document.getElementById('startScreen');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let phase = 1;
+let avion = { x: 120, y: canvas.height/2, vy: 0, size: 30 };
+let voiture = { x: 100, y: canvas.height-60, vx: 0, size: 40 };
+let arbres = [], ennemis = [], balles = [], mines = [], gouttes = [];
+let gravite = 0.35;
+let vitesse = 2.5;
+let score = 0;
+let jeuActif = false;
+let tirCooldown = 0;
+
+function dessinerAvion() {
+  ctx.save();
+  ctx.translate(avion.x, avion.y);
+  ctx.rotate(avion.vy * 0.08);
+  ctx.fillStyle = '#FF4757';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, avion.size, avion.size/2, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#2F3542';
+  ctx.fillRect(-avion.size/2, -5, avion.size, 10);
+  ctx.fillRect(-avion.size, -12, avion.size/2, 24);
+  ctx.fillStyle = '#70A1FF';
+  ctx.beginPath();
+  ctx.arc(avion.size/2, 0, 8, 0, Math.PI*2);
+  ctx.fill();
+  ctx.font = '30px Arial';
+  ctx.fillText('✈️', -15, 10);
+  ctx.restore();
 }
 
-function fermerDepot() {
-  document.getElementById('popupDepot').style.display = 'none';
+function dessinerVoiture() {
+  ctx.fillStyle = '#FFD700';
+  ctx.fillRect(voiture.x-20, voiture.y-15, 40, 30);
+  ctx.fillStyle = '#2F3542';
+  ctx.beginPath();
+  ctx.arc(voiture.x-12, voiture.y+15, 8, 0, Math.PI*2);
+  ctx.arc(voiture.x+12, voiture.y+15, 8, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#70A1FF';
+  ctx.fillRect(voiture.x-8, voiture.y-10, 16, 12);
 }
 
-function payerAirtel() {
-  let montant = document.getElementById('montantDepot').value;
-  if(montant < 1000) {
-    alert("Montant minimum 1000 FC");
-    return;
+function dessinerArbre(x, y, hauteur) {
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(x, y, 35, hauteur);
+  ctx.fillStyle = '#228B22';
+  ctx.beginPath();
+  ctx.arc(x+17, y-20, 45, 0, Math.PI*2);
+  ctx.fill();
+}
+
+function dessinerEnnemi(e) {
+  ctx.save();
+  ctx.translate(e.x, e.y);
+  ctx.fillStyle = '#57606f';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 25, 12, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#2f3542';
+  ctx.fillRect(-25, -4, 50, 8);
+  ctx.font = '24px Arial';
+  ctx.fillText('✈️', -12, 8);
+  ctx.restore();
+}
+
+function creerPluie() {
+  if(Math.random() < 0.3) {
+    gouttes.push({ x: Math.random()*canvas.width, y: 0, vy: 8+vitesse });
   }
-  
-  // OPTION 1 : Lien USSD direct - l'utilisateur compose lui-même
-  window.location.href = `tel:*141*1*1*0970709671*${montant}#`;
-  
-  // OPTION 2 : API Airtel Money - nécessite backend
-  // fetch('/api/airtel-deposit', {method:'POST', body:JSON.stringify({amount:montant, phone:'0970709671'})})
-  
-  alert(`Tu vas payer ${montant} FC vers 0970709671. Valide sur ton téléphone.`);
-  fermerDepot();
 }
 
-// Mets à jour le solde après paiement réussi depuis ton backend
-function majSolde(nouveauSolde) {
-  document.getElementById('solde').innerText = nouveauSolde;
-}
-     </script>
-<div id="menu">
-  <h1>🎲 LUDO</h1>
-  <p>Choisis ton mode de jeu</p>
-  <button class="mode-btn btn-friends" onclick="startGame('friends')">
-    👥 Jouer avec des amis<br>
-    <small style="font-size: 14px; font-weight: normal;">4 joueurs sur le même appareil</small>
-  </button>
-  <button class="mode-btn btn-bot" onclick="startGame('bot')">
-    🤖 Jouer vs Robots<br>
-    <small style="font-size: 14px; font-weight: normal;">Joue seul contre 3 robots</small>
-  </button>
-</div>
+function boucle() {
+  if(!jeuActif) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-<div id="game">
-  <h2>🎲 Ludo</h2>
-  <div id="info" class="turn-red">Tour: Rouge</div>
-  <div id="dice">Dé: -</div>
-  <button class="game-btn" id="rollBtn" onclick="rollDice()">Lancer le dé</button>
-  <button class="game-btn" onclick="backToMenu()">Menu</button>
-  <div id="board"></div>
-</div>
+  let niveau = Math.floor(score/100);
+  vitesse = 2.5 + niveau*0.4;
+  gravite = 0.35 + niveau*0.03;
 
-<script>
-let gameMode = 'bot';
-let currentPlayer = 0;
-let diceValue = 0;
-let gameOver = false;
-let isBotTurn = false;
+  // PHASE 1: FORÊT 0-499 pts - ESPACE 280px
+  if(score < 500) {
+    phase = 1;
+    hudDiv.textContent = `Score: ${score} | Phase: FORÊT | Niveau: ${niveau+1}`;
 
-const players = ['red', 'blue', 'green', 'yellow'];
-const playerColors = {
-  red: 'red-token',
-  blue: 'blue-token',
-  green: 'green-token',
-  yellow: 'yellow-token'
-};
+    let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#87CEEB');
+    gradient.addColorStop(0.7, '#90EE90');
+    gradient.addColorStop(1, '#228B22');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-let positions = {
-  red: [0, 0, 0, 0],
-  blue: [0, 0, 0, 0],
-  green: [0, 0, 0, 0],
-  yellow: [0, 0, 0, 0]
-};
+    avion.vy += gravite;
+    avion.y += avion.vy;
 
-const startPos = { red: 1, blue: 15, green: 29, yellow: 43 };
+    for(let i=0; i<arbres.length; i++) {
+      arbres[i].x -= vitesse;
+      dessinerArbre(arbres[i].x, 0, arbres[i].hauteur);
+      // ESPACE PASSAGE AGRANDI: 280px
+      dessinerArbre(arbres[i].x, arbres[i].hauteur+280, canvas.height-arbres[i].hauteur-280);
 
-function startGame(mode) {
-  gameMode = mode;
-  document.getElementById('menu').style.display = 'none';
-  document.getElementById('game').style.display = 'block';
-  resetGame();
-  createBoard();
-  drawTokens();
-}
-
-function backToMenu() {
-  document.getElementById('menu').style.display = 'block';
-  document.getElementById('game').style.display = 'none';
-}
-
-function createBoard() {
-  const board = document.getElementById('board');
-  board.innerHTML = '';
-  for(let i = 0; i < 225; i++) {
-    let cell = document.createElement('div');
-    cell.className = 'cell path';
-    cell.id = 'cell-' + i;
-
-    if(i >= 0 && i < 36 && i % 15 < 6 && Math.floor(i/15) < 6) cell.classList.add('home-red');
-    if(i >= 0 && i < 90 && i % 15 >= 9 && Math.floor(i/15) < 6) cell.classList.add('home-blue');
-    if(i >= 135 && i < 225 && i % 15 < 6 && Math.floor(i/15) >= 9) cell.classList.add('home-green');
-    if(i >= 135 && i < 225 && i % 15 >= 9 && Math.floor(i/15) >= 9) cell.classList.add('home-yellow');
-
-    board.appendChild(cell);
-  }
-
-  for(let i = 1; i <= 56; i++) {
-    let pos = getPathPosition(i);
-    if(pos >= 0) {
-      document.getElementById('cell-' + pos).classList.add('path');
-      if([1,15,29,43].includes(i)) {
-        document.getElementById('cell-' + pos).classList.add('safe');
+      if(arbres[i].x+35 < avion.x &&!arbres[i].passe) {
+        score++; arbres[i].passe = true;
+      }
+      if(avion.x+30 > arbres[i].x && avion.x-30 < arbres[i].x+35) {
+        if(avion.y-30 < arbres[i].hauteur || avion.y+30 > arbres[i].hauteur+280) gameOver();
       }
     }
+    if(arbres.length==0 || arbres[arbres.length-1].x < canvas.width-280) {
+      arbres.push({x: canvas.width, hauteur: Math.random()*(canvas.height-380)+100, passe: false});
+    }
+    if(arbres[0] && arbres[0].x < -50) arbres.shift();
   }
-}
 
-function getPathPosition(step) {
-  if(step < 1 || step > 56) return -1;
-  if(step <= 14) return 6 + step;
-  if(step <= 28) return 6*15 + (14 - step + 14);
-  if(step <= 42) return (42 - step + 28)*15 + 6;
-  return (step - 42)*15 + 6;
-}
+  // PHASE 2: CIEL + PLUIE + TIR 500-999 pts
+  else if(score < 1000) {
+    phase = 2;
+    hudDiv.textContent = `Score: ${score} | Phase: CIEL | Tire!`;
 
-function drawTokens() {
-  document.querySelectorAll('.token').forEach(t => t.remove());
+    ctx.fillStyle = '#2c3e50';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  players.forEach(player => {
-    positions[player].forEach((pos, idx) => {
-      if(pos > 0 && pos <= 56) {
-        let boardPos = getPathPosition((pos + startPos[player] - 1) % 56 + 1);
-        if(boardPos >= 0) {
-          let cell = document.getElementById('cell-' + boardPos);
-          if(cell) {
-            let token = document.createElement('div');
-            token.className = 'token ' + playerColors[player];
-            cell.appendChild(token);
-          }
-        }
-      } else if(pos === 0) {
-        let homeCell = getHomeCell(player, idx);
-        if(homeCell) homeCell.appendChild(createToken(player));
-      }
+    creerPluie();
+    gouttes.forEach(g => { g.y += g.vy; ctx.fillStyle='white'; ctx.fillRect(g.x, g.y, 2, 10); });
+    gouttes = gouttes.filter(g => g.y < canvas.height);
+
+    avion.vy += gravite;
+    avion.y += avion.vy;
+
+    if(Math.random() < 0.03) ennemis.push({x: canvas.width, y: Math.random()*(canvas.height-100)+50});
+    ennemis.forEach(e => { e.x -= vitesse+1; dessinerEnnemi(e);
+      if(Math.abs(e.x-avion.x)<30 && Math.abs(e.y-avion.y)<25) gameOver();
     });
-  });
-}
+    ennemis = ennemis.filter(e => e.x > -50);
 
-function getHomeCell(player, idx) {
-  let positions = {
-    red: [16, 17, 31, 32],
-    blue: [73, 74, 88, 89],
-    green: [150, 151, 165, 166],
-    yellow: [207, 208, 222, 223]
-  };
-  return document.getElementById('cell-' + positions[player][idx]);
-}
+    if(tirCooldown > 0) tirCooldown--;
+    balles.forEach(b => { b.x += 12; ctx.fillStyle='#FFFF00'; ctx.fillRect(b.x, b.y, 15, 4); });
+    balles = balles.filter(b => b.x < canvas.width);
 
-function createToken(player) {
-  let token = document.createElement('div');
-  token.className = 'token ' + playerColors[player];
-  return token;
-}
+    balles.forEach((b,bi) => {
+      ennemis.forEach((e,ei) => {
+        if(Math.abs(b.x-e.x)<30 && Math.abs(b.y-e.y)<20) {
+          ennemis.splice(ei,1); balles.splice(bi,1); score+=2;
+        }
+      });
+    });
 
-function rollDice() {
-  if(gameOver || isBotTurn) return;
-
-  diceValue = Math.floor(Math.random() * 6) + 1;
-  document.getElementById('dice').textContent = 'Dé: ' + diceValue;
-  document.getElementById('rollBtn').disabled = true;
-
-  let player = players[currentPlayer];
-  moveToken(player, diceValue);
-}
-
-function moveToken(player, dice) {
-  let moved = false;
-  let playerPos = positions[player];
-
-  for(let i = 0; i < 4; i++) {
-    let pos = playerPos[i];
-
-    if(pos === 0 && dice === 6) {
-      playerPos[i] = 1;
-      moved = true;
-      break;
-    } else if(pos > 0 && pos < 56) {
-      playerPos[i] = Math.min(pos + dice, 56);
-      moved = true;
-      break;
-    }
+    score++;
   }
 
-  drawTokens();
-  checkWin();
+  // PHASE 3: VOITURE MINÉE 1000+ pts
+  else {
+    phase = 3;
+    hudDiv.textContent = `Score: ${score} | Phase: VOITURE MINÉE!`;
 
-  if(!moved && dice!== 6) {
-    nextPlayer();
-  } else if(dice!== 6) {
-    nextPlayer();
+    ctx.fillStyle = '#654321';
+    ctx.fillRect(0, canvas.height-60, canvas.width, 60);
+
+    voiture.x += voiture.vx;
+    if(voiture.x < 40) voiture.x = 40;
+    if(voiture.x > canvas.width-40) voiture.x = canvas.width-40;
+
+    if(Math.random() < 0.02) mines.push({x: Math.random()*canvas.width, y: canvas.height-45});
+    mines.forEach(m => {
+      ctx.fillStyle='black'; ctx.beginPath(); ctx.arc(m.x, m.y, 12, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle='red'; ctx.fillRect(m.x-4, m.y-4, 8, 8);
+      if(Math.abs(m.x-voiture.x)<30) gameOver();
+    });
+
+    dessinerVoiture();
+    score += 0.5;
+  }
+
+  if(phase < 3 && (avion.y+30 > canvas.height || avion.y-30 < 0)) gameOver();
+
+  if(phase < 3) dessinerAvion();
+  requestAnimationFrame(boucle);
+}
+
+function tirer() {
+  if(phase==2 && tirCooldown==0) {
+    balles.push({x: avion.x+30, y: avion.y});
+    tirCooldown = 8;
+  }
+}
+
+function taper(e) {
+  if(!jeuActif) { startJeu(); return; }
+
+  let x = e.touches? e.touches[0].clientX : e.clientX;
+
+  if(phase < 3) {
+    if(x < canvas.width/2) avion.vy = -7;
+    else tirer();
   } else {
-    if(gameMode === 'friends' || player === 'red') {
-      document.getElementById('rollBtn').disabled = false;
-    } else {
-      setTimeout(botTurn, 800);
-    }
+    voiture.vx = x < canvas.width/2? -5 : 5;
+    setTimeout(()=>voiture.vx=0, 200);
   }
 }
 
-function nextPlayer() {
-  currentPlayer = (currentPlayer + 1) % 4;
-  let player = players[currentPlayer];
-
-  let playerName = player.charAt(0).toUpperCase() + player.slice(1);
-  document.getElementById('info').textContent = 'Tour: ' + playerName;
-  document.getElementById('info').className = 'turn-' + player;
-
-  if(gameMode === 'bot' && player!== 'red') {
-    isBotTurn = true;
-    setTimeout(botTurn, 800);
-  } else {
-    isBotTurn = false;
-    document.getElementById('rollBtn').disabled = false;
-    if(gameMode === 'bot') {
-      document.getElementById('info').textContent = 'Tour: Rouge - C\'est ton tour';
-    }
-  }
+function startJeu() {
+  jeuActif = true;
+  startScreen.style.display = 'none';
+  score = 0; vitesse = 2.5; gravite = 0.35; phase = 1;
+  avion.y = canvas.height/2; avion.vy = 0;
+  arbres = []; ennemis = []; balles = []; mines = []; gouttes = [];
+  boucle();
 }
 
-function botTurn() {
-  if(gameOver) return;
-
-  diceValue = Math.floor(Math.random() * 6) + 1;
-  document.getElementById('dice').textContent = 'Dé: ' + diceValue;
-
-  let player = players[currentPlayer];
-  moveToken(player, diceValue);
+function gameOver() {
+  jeuActif = false;
+  ctx.fillStyle = 'rgba(0,0,0,0.8)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'white';
+  ctx.font = '52px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('CRASH! 💥', canvas.width/2, canvas.height/2-60);
+  ctx.font = '36px Arial';
+  ctx.fillText('Score final: '+Math.floor(score), canvas.width/2, canvas.height/2);
+  ctx.font = '22px Arial';
+  ctx.fillText('Tape pour recommencer', canvas.width/2, canvas.height/2+60);
 }
 
-function checkWin() {
-  let player = players[currentPlayer];
-  if(positions[player].every(p => p === 56)) {
-    let msg;
-    if(gameMode === 'bot' && player === 'red') {
-      msg = '🎉 Tu as gagné!';
-    } else if(gameMode === 'bot') {
-      msg = '😢 ' + player.charAt(0).toUpperCase() + player.slice(1) + ' a gagné!';
-    } else {
-      msg = '🎉 ' + player.charAt(0).toUpperCase() + player.slice(1) + ' a gagné!';
-    }
-    setTimeout(() => alert(msg), 300);
-    gameOver = true;
-  }
-}
-
-function resetGame() {
-  positions = {
-    red: [0, 0, 0, 0],
-    blue: [0, 0, 0, 0],
-    green: [0, 0, 0, 0],
-    yellow: [0, 0, 0, 0]
-  };
-  currentPlayer = 0;
-  diceValue = 0;
-  gameOver = false;
-  isBotTurn = false;
-  document.getElementById('dice').textContent = 'Dé: -';
-
-  if(gameMode === 'bot') {
-    document.getElementById('info').textContent = 'Tour: Rouge - C\'est ton tour';
-  } else {
-    document.getElementById('info').textContent = 'Tour: Rouge';
-  }
-  document.getElementById('info').className = 'turn-red';
-  document.getElementById('rollBtn').disabled = false;
-}
+canvas.addEventListener('click', taper);
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); taper(e); });
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
 </script>
-
 </body>
 </html>
