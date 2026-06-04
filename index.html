@@ -6,28 +6,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: Arial, sans-serif; background: #87CEEB; overflow: hidden; touch-action: none; }
-  #gameCanvas { display: block; margin: 0 auto; background: #87CEEB; }
+  body {
+    font-family: 'Arial Black', Arial, sans-serif;
+    background: #000;
+    overflow: hidden;
+    touch-action: none;
+  }
+  #gameCanvas {
+    display: block;
+    margin: 0 auto;
+    filter: contrast(1.1) saturate(1.2);
+  }
   #title {
     position: absolute;
-    top: 15px;
+    top: 20px;
     width: 100%;
     text-align: center;
-    font-size: 42px;
-    font-weight: bold;
-    color: #FFD700;
-    text-shadow: 4px 4px 0px #FF4500;
-    letter-spacing: 2px;
+    font-size: 52px;
+    font-weight: 900;
+    background: linear-gradient(45deg, #FFD700, #FFA500, #FF6347);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(255,215,0,0.6), 4px 4px 0px #8B0000;
+    letter-spacing: 4px;
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  @keyframes glow {
+    from { filter: drop-shadow(0 0 10px #FFD700); }
+    to { filter: drop-shadow(0 0 25px #FF6347); }
   }
   #hud {
     position: absolute;
-    top: 70px;
+    top: 90px;
     width: 100%;
     text-align: center;
-    font-size: 28px;
+    font-size: 26px;
     font-weight: bold;
-    color: white;
-    text-shadow: 2px 2px 4px black;
+    color: #fff;
+    text-shadow: 0 0 10px #00ffff, 2px 2px 8px black;
+    background: rgba(0,0,0,0.4);
+    padding: 8px;
+    backdrop-filter: blur(5px);
   }
   #startScreen {
     position: absolute;
@@ -36,10 +56,20 @@
     transform: translate(-50%, -50%);
     text-align: center;
     color: white;
-    background: rgba(0,0,0,0.8);
-    padding: 30px;
-    border-radius: 20px;
-    max-width: 350px;
+    background: rgba(0,0,0,0.85);
+    padding: 35px;
+    border-radius: 25px;
+    border: 3px solid #FFD700;
+    box-shadow: 0 0 40px rgba(255,215,0,0.5);
+    max-width: 380px;
+    backdrop-filter: blur(10px);
+  }
+  #startScreen h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    background: linear-gradient(45deg, #FFD700, #fff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 </style>
 </head>
@@ -51,10 +81,10 @@
 
 <div id="startScreen">
   <h2>✈️ CYRIL CRASH ✈️</h2>
-  <p>0-500 pts: Forêt facile - grand passage</p>
-  <p>500+ pts: Ciel + pluie + tire sur avions</p>
-  <p>1000 pts: Atterrissage + voiture minée 🚗💣</p>
-  <p style="margin-top:15px; font-size:14px;">Tape gauche: Monter<br>Tape droite: Tirer/Avancer</p>
+  <p>0-500 pts: Forêt réaliste</p>
+  <p>500+ pts: Ciel orageux + combat aérien</p>
+  <p>1000 pts: Mission voiture minée</p>
+  <p style="margin-top:15px; font-size:15px;">Tape gauche: Monter<br>Tape droite: Tirer/Avancer</p>
 </div>
 
 <script>
@@ -67,73 +97,161 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let phase = 1;
-let avion = { x: 120, y: canvas.height/2, vy: 0, size: 30 };
-let voiture = { x: 100, y: canvas.height-60, vx: 0, size: 40 };
-let arbres = [], ennemis = [], balles = [], mines = [], gouttes = [];
-let gravite = 0.35;
-let vitesse = 2.5;
+let avion = { x: 140, y: canvas.height/2, vy: 0, size: 35 };
+let voiture = { x: 100, y: canvas.height-70, vx: 0, size: 45 };
+let arbres = [], ennemis = [], balles = [], mines = [], gouttes = [], nuages = [], fumee = [];
+let gravite = 0.32;
+let vitesse = 2.3;
 let score = 0;
 let jeuActif = false;
 let tirCooldown = 0;
 
-function dessinerAvion() {
+// Générer nuages
+for(let i=0; i<5; i++) {
+  nuages.push({x: Math.random()*canvas.width, y: Math.random()*200, size: 60+Math.random()*40});
+}
+
+function dessinerAvionRealiste() {
   ctx.save();
   ctx.translate(avion.x, avion.y);
-  ctx.rotate(avion.vy * 0.08);
-  ctx.fillStyle = '#FF4757';
+  ctx.rotate(avion.vy * 0.07);
+
+  // Ombre
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
   ctx.beginPath();
-  ctx.ellipse(0, 0, avion.size, avion.size/2, 0, 0, Math.PI*2);
+  ctx.ellipse(5, 8, avion.size*1.1, avion.size/2, 0, 0, Math.PI*2);
   ctx.fill();
-  ctx.fillStyle = '#2F3542';
-  ctx.fillRect(-avion.size/2, -5, avion.size, 10);
-  ctx.fillRect(-avion.size, -12, avion.size/2, 24);
-  ctx.fillStyle = '#70A1FF';
+
+  // Corps avec gradient métal
+  let grad = ctx.createLinearGradient(-avion.size, 0, avion.size, 0);
+  grad.addColorStop(0, '#c0c0c0');
+  grad.addColorStop(0.5, '#f0f0f0');
+  grad.addColorStop(1, '#808080');
+  ctx.fillStyle = grad;
   ctx.beginPath();
-  ctx.arc(avion.size/2, 0, 8, 0, Math.PI*2);
+  ctx.ellipse(0, 0, avion.size, avion.size/2.2, 0, 0, Math.PI*2);
   ctx.fill();
-  ctx.font = '30px Arial';
-  ctx.fillText('✈️', -15, 10);
+
+  // Ailes
+  ctx.fillStyle = '#2c3e50';
+  ctx.fillRect(-avion.size/2-5, -6, avion.size+10, 12);
+
+  // Cockpit vitré
+  let cockpitGrad = ctx.createRadialGradient(avion.size/2, 0, 0, avion.size/2, 0, 12);
+  cockpitGrad.addColorStop(0, '#87CEFA');
+  cockpitGrad.addColorStop(1, '#1e90ff');
+  ctx.fillStyle = cockpitGrad;
+  ctx.beginPath();
+  ctx.arc(avion.size/2, 0, 11, 0, Math.PI*2);
+  ctx.fill();
+
+  // Reflet cockpit
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.beginPath();
+  ctx.arc(avion.size/2-3, -3, 4, 0, Math.PI*2);
+  ctx.fill();
+
+  // Fumée réacteur
+  if(Math.random() < 0.5) {
+    fumee.push({x: avion.x-avion.size, y: avion.y+Math.random()*10-5, size: 8, life: 20});
+  }
+
+  ctx.font = '32px Arial';
+  ctx.fillText('✈️', -16, 11);
   ctx.restore();
+
+  // Dessiner fumée
+  fumee.forEach((f, i) => {
+    f.x -= 2;
+    f.size += 0.5;
+    f.life--;
+    ctx.fillStyle = `rgba(200,200,200,${f.life/20})`;
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, f.size, 0, Math.PI*2);
+    ctx.fill();
+  });
+  fumee = fumee.filter(f => f.life > 0);
 }
 
-function dessinerVoiture() {
-  ctx.fillStyle = '#FFD700';
-  ctx.fillRect(voiture.x-20, voiture.y-15, 40, 30);
-  ctx.fillStyle = '#2F3542';
-  ctx.beginPath();
-  ctx.arc(voiture.x-12, voiture.y+15, 8, 0, Math.PI*2);
-  ctx.arc(voiture.x+12, voiture.y+15, 8, 0, Math.PI*2);
-  ctx.fill();
-  ctx.fillStyle = '#70A1FF';
-  ctx.fillRect(voiture.x-8, voiture.y-10, 16, 12);
-}
+function dessinerArbreRealiste(x, y, hauteur) {
+  // Ombre arbre
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fillRect(x+5, y+5, 35, hauteur);
 
-function dessinerArbre(x, y, hauteur) {
-  ctx.fillStyle = '#8B4513';
+  // Tronc avec texture
+  let troncGrad = ctx.createLinearGradient(x, 0, x+35, 0);
+  troncGrad.addColorStop(0, '#5D4037');
+  troncGrad.addColorStop(0.5, '#8B4513');
+  troncGrad.addColorStop(1, '#3E2723');
+  ctx.fillStyle = troncGrad;
   ctx.fillRect(x, y, 35, hauteur);
-  ctx.fillStyle = '#228B22';
+
+  // Détail écorce
+  ctx.strokeStyle = '#2E1A0A';
+  for(let i=0; i<hauteur; i+=15) {
+    ctx.beginPath();
+    ctx.moveTo(x+5, y+i);
+    ctx.lineTo(x+30, y+i+8);
+    ctx.stroke();
+  }
+
+  // Feuillage avec gradient
+  let feuilleGrad = ctx.createRadialGradient(x+17, y-25, 0, x+17, y-25, 50);
+  feuilleGrad.addColorStop(0, '#2E7D32');
+  feuilleGrad.addColorStop(0.7, '#1B5E20');
+  feuilleGrad.addColorStop(1, '#0D3B13');
+  ctx.fillStyle = feuilleGrad;
   ctx.beginPath();
-  ctx.arc(x+17, y-20, 45, 0, Math.PI*2);
+  ctx.arc(x+17, y-25, 50, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x+17, y-45, 38, 0, Math.PI*2);
   ctx.fill();
 }
 
-function dessinerEnnemi(e) {
+function dessinerEnnemiRealiste(e) {
   ctx.save();
   ctx.translate(e.x, e.y);
-  ctx.fillStyle = '#57606f';
+
+  // Ombre
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.beginPath();
+  ctx.ellipse(3, 5, 27, 14, 0, Math.PI*2);
+  ctx.fill();
+
+  // Corps métal sombre
+  let grad = ctx.createLinearGradient(-25, 0, 25, 0);
+  grad.addColorStop(0, '#37474F');
+  grad.addColorStop(0.5, '#546E7A');
+  grad.addColorStop(1, '#263238');
+  ctx.fillStyle = grad;
   ctx.beginPath();
   ctx.ellipse(0, 0, 25, 12, 0, Math.PI*2);
   ctx.fill();
-  ctx.fillStyle = '#2f3542';
+
+  ctx.fillStyle = '#1a1a1a';
   ctx.fillRect(-25, -4, 50, 8);
-  ctx.font = '24px Arial';
-  ctx.fillText('✈️', -12, 8);
+  ctx.font = '26px Arial';
+  ctx.fillText('✈️', -13, 9);
   ctx.restore();
 }
 
-function creerPluie() {
-  if(Math.random() < 0.3) {
-    gouttes.push({ x: Math.random()*canvas.width, y: 0, vy: 8+vitesse });
+function dessinerNuages() {
+  nuages.forEach(n => {
+    n.x -= 0.5;
+    if(n.x < -100) n.x = canvas.width + 100;
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.size, 0, Math.PI*2);
+    ctx.arc(n.x+30, n.y+10, n.size*0.8, 0, Math.PI*2);
+    ctx.arc(n.x-30, n.y+10, n.size*0.7, 0, Math.PI*2);
+    ctx.fill();
+  });
+}
+
+function creerPluieRealiste() {
+  if(Math.random() < 0.4) {
+    gouttes.push({ x: Math.random()*canvas.width, y: 0, vy: 10+vitesse, length: 15+Math.random()*10 });
   }
 }
 
@@ -142,71 +260,95 @@ function boucle() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   let niveau = Math.floor(score/100);
-  vitesse = 2.5 + niveau*0.4;
-  gravite = 0.35 + niveau*0.03;
+  vitesse = 2.3 + niveau*0.35;
+  gravite = 0.32 + niveau*0.025;
 
-  // PHASE 1: FORÊT 0-499 pts - ESPACE 280px
+  // PHASE 1: FORÊT RÉALISTE
   if(score < 500) {
     phase = 1;
     hudDiv.textContent = `Score: ${score} | Phase: FORÊT | Niveau: ${niveau+1}`;
 
-    let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, '#87CEEB');
-    gradient.addColorStop(0.7, '#90EE90');
-    gradient.addColorStop(1, '#228B22');
-    ctx.fillStyle = gradient;
+    // Ciel avec gradient + nuages
+    let cielGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    cielGrad.addColorStop(0, '#87CEEB');
+    cielGrad.addColorStop(0.5, '#98FB98');
+    cielGrad.addColorStop(1, '#228B22');
+    ctx.fillStyle = cielGrad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    dessinerNuages();
 
     avion.vy += gravite;
     avion.y += avion.vy;
 
     for(let i=0; i<arbres.length; i++) {
       arbres[i].x -= vitesse;
-      dessinerArbre(arbres[i].x, 0, arbres[i].hauteur);
-      // ESPACE PASSAGE AGRANDI: 280px
-      dessinerArbre(arbres[i].x, arbres[i].hauteur+280, canvas.height-arbres[i].hauteur-280);
+      dessinerArbreRealiste(arbres[i].x, 0, arbres[i].hauteur);
+      // ESPACE 280px pour passage facile
+      dessinerArbreRealiste(arbres[i].x, arbres[i].hauteur+280, canvas.height-arbres[i].hauteur-280);
 
       if(arbres[i].x+35 < avion.x &&!arbres[i].passe) {
         score++; arbres[i].passe = true;
       }
-      if(avion.x+30 > arbres[i].x && avion.x-30 < arbres[i].x+35) {
-        if(avion.y-30 < arbres[i].hauteur || avion.y+30 > arbres[i].hauteur+280) gameOver();
+      if(avion.x+35 > arbres[i].x && avion.x-35 < arbres[i].x+35) {
+        if(avion.y-35 < arbres[i].hauteur || avion.y+35 > arbres[i].hauteur+280) gameOver();
       }
     }
-    if(arbres.length==0 || arbres[arbres.length-1].x < canvas.width-280) {
-      arbres.push({x: canvas.width, hauteur: Math.random()*(canvas.height-380)+100, passe: false});
+    if(arbres.length==0 || arbres[arbres.length-1].x < canvas.width-300) {
+      arbres.push({x: canvas.width, hauteur: Math.random()*(canvas.height-380)+120, passe: false});
     }
-    if(arbres[0] && arbres[0].x < -50) arbres.shift();
+    if(arbres[0] && arbres[0].x < -60) arbres.shift();
   }
 
-  // PHASE 2: CIEL + PLUIE + TIR 500-999 pts
+  // PHASE 2: CIEL ORAGEUX
   else if(score < 1000) {
     phase = 2;
-    hudDiv.textContent = `Score: ${score} | Phase: CIEL | Tire!`;
+    hudDiv.textContent = `Score: ${score} | Phase: ORAGE | Tire!`;
 
-    ctx.fillStyle = '#2c3e50';
+    let orageGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    orageGrad.addColorStop(0, '#2c3e50');
+    orageGrad.addColorStop(1, '#1a1a2e');
+    ctx.fillStyle = orageGrad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    creerPluie();
-    gouttes.forEach(g => { g.y += g.vy; ctx.fillStyle='white'; ctx.fillRect(g.x, g.y, 2, 10); });
+    creerPluieRealiste();
+    gouttes.forEach(g => {
+      g.y += g.vy;
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(g.x, g.y);
+      ctx.lineTo(g.x-2, g.y+g.length);
+      ctx.stroke();
+    });
     gouttes = gouttes.filter(g => g.y < canvas.height);
 
     avion.vy += gravite;
     avion.y += avion.vy;
 
-    if(Math.random() < 0.03) ennemis.push({x: canvas.width, y: Math.random()*(canvas.height-100)+50});
-    ennemis.forEach(e => { e.x -= vitesse+1; dessinerEnnemi(e);
-      if(Math.abs(e.x-avion.x)<30 && Math.abs(e.y-avion.y)<25) gameOver();
+    if(Math.random() < 0.035) ennemis.push({x: canvas.width, y: Math.random()*(canvas.height-120)+60});
+    ennemis.forEach(e => {
+      e.x -= vitesse+1.2;
+      dessinerEnnemiRealiste(e);
+      if(Math.abs(e.x-avion.x)<35 && Math.abs(e.y-avion.y)<28) gameOver();
     });
-    ennemis = ennemis.filter(e => e.x > -50);
+    ennemis = ennemis.filter(e => e.x > -60);
 
     if(tirCooldown > 0) tirCooldown--;
-    balles.forEach(b => { b.x += 12; ctx.fillStyle='#FFFF00'; ctx.fillRect(b.x, b.y, 15, 4); });
+    balles.forEach(b => {
+      b.x += 14;
+      // Balle avec glow
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#FFFF00';
+      ctx.fillStyle = '#FFFF00';
+      ctx.fillRect(b.x, b.y-2, 18, 4);
+      ctx.shadowBlur = 0;
+    });
     balles = balles.filter(b => b.x < canvas.width);
 
     balles.forEach((b,bi) => {
       ennemis.forEach((e,ei) => {
-        if(Math.abs(b.x-e.x)<30 && Math.abs(b.y-e.y)<20) {
+        if(Math.abs(b.x-e.x)<35 && Math.abs(b.y-e.y)<22) {
           ennemis.splice(ei,1); balles.splice(bi,1); score+=2;
         }
       });
@@ -215,77 +357,106 @@ function boucle() {
     score++;
   }
 
-  // PHASE 3: VOITURE MINÉE 1000+ pts
+  // PHASE 3: VOITURE MINÉE
   else {
     phase = 3;
-    hudDiv.textContent = `Score: ${score} | Phase: VOITURE MINÉE!`;
+    hudDiv.textContent = `Score: ${score} | Phase: MISSION VOITURE`;
 
-    ctx.fillStyle = '#654321';
-    ctx.fillRect(0, canvas.height-60, canvas.width, 60);
+    let solGrad = ctx.createLinearGradient(0, canvas.height-70, 0, canvas.height);
+    solGrad.addColorStop(0, '#8B4513');
+    solGrad.addColorStop(1, '#3E2723');
+    ctx.fillStyle = solGrad;
+    ctx.fillRect(0, canvas.height-70, canvas.width, 70);
 
     voiture.x += voiture.vx;
-    if(voiture.x < 40) voiture.x = 40;
-    if(voiture.x > canvas.width-40) voiture.x = canvas.width-40;
+    if(voiture.x < 45) voiture.x = 45;
+    if(voiture.x > canvas.width-45) voiture.x = canvas.width-45;
 
-    if(Math.random() < 0.02) mines.push({x: Math.random()*canvas.width, y: canvas.height-45});
+    if(Math.random() < 0.022) mines.push({x: Math.random()*canvas.width, y: canvas.height-50});
     mines.forEach(m => {
-      ctx.fillStyle='black'; ctx.beginPath(); ctx.arc(m.x, m.y, 12, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle='red'; ctx.fillRect(m.x-4, m.y-4, 8, 8);
-      if(Math.abs(m.x-voiture.x)<30) gameOver();
+      // Mine avec glow rouge
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = 'red';
+      ctx.fillStyle = 'black';
+      ctx.beginPath();
+      ctx.arc(m.x, m.y, 14, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = 'red';
+      ctx.fillRect(m.x-5, m.y-5, 10, 10);
+      ctx.shadowBlur = 0;
+      if(Math.abs(m.x-voiture.x)<32) gameOver();
     });
 
-    dessinerVoiture();
+    // Dessiner voiture réaliste
+    ctx.save();
+    ctx.translate(voiture.x, voiture.y);
+    ctx.fillStyle = '#FFD700';
+    ctx.fillRect(-22, -18, 44, 36);
+    ctx.fillStyle = '#2F3542';
+    ctx.beginPath();
+    ctx.arc(-14, 18, 10, 0, Math.PI*2);
+    ctx.arc(14, 18, 10, 0, Math.PI*2);
+    ctx.fill();
+    let vitreGrad = ctx.createLinearGradient(-10, -15, 10, -5);
+    vitreGrad.addColorStop(0, '#87CEFA');
+    vitreGrad.addColorStop(1, '#4169E1');
+    ctx.fillStyle = vitreGrad;
+    ctx.fillRect(-10, -13, 20, 15);
+    ctx.restore();
+
     score += 0.5;
   }
 
-  if(phase < 3 && (avion.y+30 > canvas.height || avion.y-30 < 0)) gameOver();
+  if(phase < 3 && (avion.y+35 > canvas.height || avion.y-35 < 0)) gameOver();
 
-  if(phase < 3) dessinerAvion();
+  if(phase < 3) dessinerAvionRealiste();
   requestAnimationFrame(boucle);
 }
 
 function tirer() {
   if(phase==2 && tirCooldown==0) {
-    balles.push({x: avion.x+30, y: avion.y});
-    tirCooldown = 8;
+    balles.push({x: avion.x+35, y: avion.y});
+    tirCooldown = 7;
   }
 }
 
 function taper(e) {
   if(!jeuActif) { startJeu(); return; }
-
   let x = e.touches? e.touches[0].clientX : e.clientX;
-
   if(phase < 3) {
-    if(x < canvas.width/2) avion.vy = -7;
+    if(x < canvas.width/2) avion.vy = -6.8;
     else tirer();
   } else {
-    voiture.vx = x < canvas.width/2? -5 : 5;
-    setTimeout(()=>voiture.vx=0, 200);
+    voiture.vx = x < canvas.width/2? -5.5 : 5.5;
+    setTimeout(()=>voiture.vx=0, 180);
   }
 }
 
 function startJeu() {
   jeuActif = true;
   startScreen.style.display = 'none';
-  score = 0; vitesse = 2.5; gravite = 0.35; phase = 1;
+  score = 0; vitesse = 2.3; gravite = 0.32; phase = 1;
   avion.y = canvas.height/2; avion.vy = 0;
-  arbres = []; ennemis = []; balles = []; mines = []; gouttes = [];
+  arbres = []; ennemis = []; balles = []; mines = []; gouttes = []; fumee = [];
   boucle();
 }
 
 function gameOver() {
   jeuActif = false;
-  ctx.fillStyle = 'rgba(0,0,0,0.8)';
+  ctx.fillStyle = 'rgba(0,0,0,0.85)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = 'white';
-  ctx.font = '52px Arial';
+  ctx.fillStyle = '#FF6347';
+  ctx.font = 'bold 56px Arial';
   ctx.textAlign = 'center';
-  ctx.fillText('CRASH! 💥', canvas.width/2, canvas.height/2-60);
-  ctx.font = '36px Arial';
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = '#FF6347';
+  ctx.fillText('CRASH! 💥', canvas.width/2, canvas.height/2-70);
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = 'white';
+  ctx.font = '38px Arial';
   ctx.fillText('Score final: '+Math.floor(score), canvas.width/2, canvas.height/2);
-  ctx.font = '22px Arial';
-  ctx.fillText('Tape pour recommencer', canvas.width/2, canvas.height/2+60);
+  ctx.font = '24px Arial';
+  ctx.fillText('Tape pour recommencer', canvas.width/2, canvas.height/2+70);
 }
 
 canvas.addEventListener('click', taper);
