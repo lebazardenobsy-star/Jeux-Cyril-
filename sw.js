@@ -1,18 +1,43 @@
-const CACHE_NAME = "cyril-slice-v1";
+const CACHE_NAME = 'cyril-crash-v1';
 const FILES_TO_CACHE = [
-  "./",
-  "./index.html",
-  "./manifest.json"
+  'index.html',
+  'manifest.json',
+  'icon-166.png',
+  'icon-167.png',
+  'PSquare_-_Bring_it_On_[Official_Video]_ft._Dave_Scott(256k).mp3'
 ];
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(FILES_TO_CACHE))
+// Installation : on met tout en cache
+self.addEventListener('install', (e) => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(FILES_TO_CACHE);
+    })
   );
+  self.skipWaiting();
 });
 
-self.addEventListener("fetch", (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => response || fetch(event.request))
+// Activation : on supprime l’ancien cache
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if(key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    })
+  );
+  self.clients.claim();
+});
+
+// Fetch : on sert depuis le cache si dispo
+self.addEventListener('fetch', (e) => {
+  e.respondWith(
+    caches.match(e.request).then((response) => {
+      return response || fetch(e.request);
+    })
   );
 });
