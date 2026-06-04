@@ -1,10 +1,11 @@
-const CACHE_NAME = 'cyril-crash-v1';
+const CACHE_NAME = 'cyril-crash-v2';
 const FILES_TO_CACHE = [
-  'index.html',
-  'manifest.json',
-  'icon-166.png',
-  'icon-167.png',
-  'PSquare_-_Bring_it_On_[Official_Video]_ft._Dave_Scott(256k).mp3'
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
+  './PSquare__Bring_it_On_[Official_Video]_ft._Dave_Scott(256k).mp3'
 ];
 
 // Installation : on met tout en cache
@@ -17,7 +18,7 @@ self.addEventListener('install', (e) => {
   self.skipWaiting();
 });
 
-// Activation : on supprime l’ancien cache
+// Activation : on supprime l'ancien cache
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
