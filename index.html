@@ -154,7 +154,7 @@ body {
 <body>
 
 <div id="title">CYRIL CRASH</div>
-<div id="hud">Score: 0 | Niveau: MENU</div>
+<div id="hud">Score: 0 | MENU</div>
 <button id="btnRetour" onclick="retourMenu()">← MENU</button>
 <canvas id="gameCanvas"></canvas>
 
@@ -164,8 +164,9 @@ body {
 
 <div id="startScreen">
   <h2>✈️ CYRIL CRASH ✈️</h2>
-  <p>Choisis ton niveau:</p>
-  <button onclick="ouvrirMenu()" style="padding:15px 30px; font-size:18px; background:linear-gradient(45deg,#FFD700,#FF6347); border:none; border-radius:12px; color:black; font-weight:bold; margin:10px; cursor:pointer;">JOUER</button>
+  <p>Choisis ton mode:</p>
+  <button onclick="ouvrirMenuAvion()" style="padding:15px 30px; font-size:18px; background:linear-gradient(45deg,#FFD700,#FF6347); border:none; border-radius:12px; color:black; font-weight:bold; margin:10px; cursor:pointer;">AVION LIBRE</button>
+  <button onclick="startNiveau(6)" style="padding:15px 30px; font-size:18px; background:linear-gradient(45deg,#1E90FF,#00BFFF); border:none; border-radius:12px; color:white; font-weight:bold; margin:10px; cursor:pointer;">AVION ESPACE</button>
   <p style="margin-top:20px; font-size:14px; color:#ccc;">Niveaux 2-5: Mot de passe requis</p>
   <p style="margin-top:10px;">Besoin du mot de passe?
     <a class="whatsapp" href="https://wa.me/243970709671?text=Bonjour%20Cyril,%20donne-moi%20le%20mot%20de%20passe%20CYRIL%20CRASH%20stp" target="_blank">+243970709671</a>
@@ -173,24 +174,24 @@ body {
 </div>
 
 <div id="menuNiveaux">
-  <h2>CHOISIR NIVEAU</h2>
+  <h2>AVION LIBRE - CHOISIR NIVEAU</h2>
 
-  <p>1. Avion - Libre</p>
+  <p>1. Niveau Facile</p>
   <button onclick="startNiveau(1)">JOUER</button>
 
-  <p>2. Voiture 🔒</p>
+  <p>2. Niveau Moyen 🔒</p>
   <input type="password" id="pass2" placeholder="Mot de passe">
   <button onclick="verifierPass(2)">JOUER</button>
 
-  <p>3. Moto 🔒</p>
+  <p>3. Niveau Difficile 🔒</p>
   <input type="password" id="pass3" placeholder="Mot de passe">
   <button onclick="verifierPass(3)">JOUER</button>
 
-  <p>4. Tennis 🔒</p>
+  <p>4. Niveau Expert 🔒</p>
   <input type="password" id="pass4" placeholder="Mot de passe">
   <button onclick="verifierPass(4)">JOUER</button>
 
-  <p>5. Espace 🔒</p>
+  <p>5. Niveau Boss 🔒</p>
   <input type="password" id="pass5" placeholder="Mot de passe">
   <button onclick="verifierPass(5)">JOUER</button>
 
@@ -242,11 +243,9 @@ function toggleMusic() {
 
 // === VARIABLES JEU ===
 let niveauActuel = 1;
-let phase = 1;
+let sousNiveau = 1;
 let avion = { x: 140, y: canvas.height/2, vy: 0, size: 40 };
-let voiture = { x: 100, y: canvas.height-70, vx: 0, size: 45 };
-let moto = { x: 100, y: canvas.height-60, vx: 0, size: 35 };
-let balles = [], ennemis = [], boss = null, arbres = [], mines = [], gouttes = [], nuages = [], fumee = [];
+let balles = [], ennemis = [], arbres = [], fumee = [], nuages = [];
 let gravite = 0.32;
 let vitesse = 2.3;
 let score = 0;
@@ -307,36 +306,6 @@ function dessinerAvionRealiste() {
   fumee = fumee.filter(f => f.life > 0);
 }
 
-function dessinerBoss(b) {
-  ctx.save();
-  ctx.translate(b.x, b.y);
-  ctx.fillStyle = 'rgba(0,0,0,0.6)';
-  ctx.beginPath(); ctx.ellipse(5, 10, 60, 25, 0, Math.PI*2); ctx.fill();
-  let grad = ctx.createLinearGradient(-50, 0, 50, 0);
-  grad.addColorStop(0, '#8B0000');
-  grad.addColorStop(0.5, '#DC143C');
-  grad.addColorStop(1, '#FF0000');
-  ctx.fillStyle = grad;
-  ctx.beginPath(); ctx.ellipse(0, 0, 50, 20, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle = '#FFD700';
-  ctx.fillRect(-50, -5, 100, 10);
-  ctx.font = '40px Arial';
-  ctx.fillText('✈️', -20, 15);
-  ctx.fillStyle = 'white';
-  ctx.font = '20px Arial';
-  ctx.fillText('BOSS HP:'+b.hp, -35, -30);
-  ctx.restore();
-}
-
-function dessinerArbre(x, y, h) {
-  let grad = ctx.createLinearGradient(x, 0, x+35, 0);
-  grad.addColorStop(0, '#5D4037'); grad.addColorStop(0.5, '#8B4513'); grad.addColorStop(1, '#3E2723');
-  ctx.fillStyle = grad; ctx.fillRect(x, y, 35, h);
-  let feuille = ctx.createRadialGradient(x+17, y-25, 0, x+17, y-25, 50);
-  feuille.addColorStop(0, '#2E7D32'); feuille.addColorStop(1, '#0D3B13');
-  ctx.fillStyle = feuille; ctx.beginPath(); ctx.arc(x+17, y-25, 50, 0, Math.PI*2); ctx.fill();
-}
-
 function dessinerEnnemi(e) {
   ctx.save();
   ctx.translate(e.x, e.y);
@@ -348,27 +317,13 @@ function dessinerEnnemi(e) {
   ctx.restore();
 }
 
-function dessinerVoiture() {
-  ctx.save();
-  ctx.translate(voiture.x, voiture.y);
-  ctx.fillStyle = '#FFD700'; ctx.fillRect(-22, -18, 44, 36);
-  ctx.fillStyle = '#2F3542';
-  ctx.beginPath(); ctx.arc(-14, 18, 10, 0, Math.PI*2); ctx.arc(14, 18, 10, 0, Math.PI*2); ctx.fill();
-  let vitre = ctx.createLinearGradient(-10, -15, 10, -5);
-  vitre.addColorStop(0, '#87CEFA'); vitre.addColorStop(1, '#4169E1');
-  ctx.fillStyle = vitre; ctx.fillRect(-10, -13, 20, 15);
-  ctx.restore();
-}
-
-function dessinerMoto() {
-  ctx.save();
-  ctx.translate(moto.x, moto.y);
-  ctx.fillStyle = '#FF4500'; ctx.fillRect(-18, -10, 36, 20);
-  ctx.fillStyle = '#2F3542';
-  ctx.beginPath(); ctx.arc(-12, 12, 8, 0, Math.PI*2); ctx.arc(12, 12, 8, 0, Math.PI*2); ctx.fill();
-  ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(12, 0); ctx.stroke();
-  ctx.restore();
+function dessinerArbre(x, y, h) {
+  let grad = ctx.createLinearGradient(x, 0, x+35, 0);
+  grad.addColorStop(0, '#5D4037'); grad.addColorStop(0.5, '#8B4513'); grad.addColorStop(1, '#3E2723');
+  ctx.fillStyle = grad; ctx.fillRect(x, y, 35, h);
+  let feuille = ctx.createRadialGradient(x+17, y-25, 0, x+17, y-25, 50);
+  feuille.addColorStop(0, '#2E7D32'); feuille.addColorStop(1, '#0D3B13');
+  ctx.fillStyle = feuille; ctx.beginPath(); ctx.arc(x+17, y-25, 50, 0, Math.PI*2); ctx.fill();
 }
 
 function dessinerNuages() {
@@ -388,49 +343,35 @@ function boucle() {
   if(!jeuActif) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  vitesse = 2.3 + Math.floor(score/100)*0.3;
-  gravite = 0.32 + Math.floor(score/100)*0.02;
+  // Difficulté selon sous-niveau Avion Libre
+  let mult = sousNiveau == 1? 1 : sousNiveau == 2? 1.3 : sousNiveau == 3? 1.6 : sousNiveau == 4? 2 : 2.5;
+  vitesse = (2.3 + Math.floor(score/100)*0.3) * mult;
+  gravite = (0.32 + Math.floor(score/100)*0.02) * mult;
 
-  if(niveauActuel == 1) {
-    phase = 1;
-    hudDiv.textContent = `Score: ${score} | Niveau: AVION`;
+  // === AVION LIBRE NIVEAUX 1-5 ===
+  if(niveauActuel >= 1 && niveauActuel <= 5) {
+    hudDiv.textContent = `Score: ${score} | Avion Libre Niv${sousNiveau}`;
     let ciel = ctx.createLinearGradient(0, 0, 0, canvas.height);
     ciel.addColorStop(0, '#87CEEB'); ciel.addColorStop(1, '#228B22');
     ctx.fillStyle = ciel; ctx.fillRect(0, 0, canvas.width, canvas.height);
     dessinerNuages();
     avion.vy += gravite; avion.y += avion.vy;
+
+    // Espace 350px pour que ça passe facile
     for(let i=0; i<arbres.length; i++) {
       arbres[i].x -= vitesse;
       dessinerArbre(arbres[i].x, 0, arbres[i].hauteur);
-      dessinerArbre(arbres[i].x, arbres[i].hauteur+280, canvas.height-arbres[i].hauteur-280);
+      dessinerArbre(arbres[i].x, arbres[i].hauteur+350, canvas.height-arbres[i].hauteur-350);
       if(arbres[i].x+35 < avion.x &&!arbres[i].passe) { score++; arbres[i].passe = true; }
       if(avion.x+35 > arbres[i].x && avion.x-35 < arbres[i].x+35) {
-        if(avion.y-35 < arbres[i].hauteur || avion.y+35 > arbres[i].hauteur+280) gameOver();
+        if(avion.y-35 < arbres[i].hauteur || avion.y+35 > arbres[i].hauteur+350) gameOver();
       }
     }
     if(arbres.length==0 || arbres[arbres.length-1].x < canvas.width-300) {
-      arbres.push({x: canvas.width, hauteur: Math.random()*(canvas.height-380)+120, passe: false});
+      arbres.push({x: canvas.width, hauteur: Math.random()*(canvas.height-450)+150, passe: false});
     }
     if(arbres[0] && arbres[0].x < -60) arbres.shift();
-    if(score >= 20 && Math.random() < 0.03) {
-      ennemis.push({x: canvas.width, y: Math.random()*(canvas.height-100)+50});
-    }
-    if(score >= 50 &&!boss) {
-      boss = {x: canvas.width, y: canvas.height/2, hp: 3, size: 50};
-      playSound(60, 1, 'sawtooth');
-    }
-    if(boss) {
-      boss.x -= vitesse;
-      dessinerBoss(boss);
-      if(Math.abs(boss.x-avion.x) < 50 && Math.abs(boss.y-avion.y) < 30) gameOver();
-      if(boss.x < -100) boss = null;
-    }
-    ennemis.forEach(e => {
-      e.x -= vitesse+1;
-      dessinerEnnemi(e);
-      if(Math.abs(e.x-avion.x)<35 && Math.abs(e.y-avion.y)<28) gameOver();
-    });
-    ennemis = ennemis.filter(e => e.x > -60);
+
     if(tirCooldown > 0) tirCooldown--;
     balles.forEach(b => {
       b.x += 14;
@@ -438,91 +379,49 @@ function boucle() {
       ctx.fillStyle = '#FFFF00'; ctx.fillRect(b.x, b.y-2, 18, 4); ctx.shadowBlur = 0;
     });
     balles = balles.filter(b => b.x < canvas.width);
-    balles.forEach((b,bi) => {
-      ennemis.forEach((e,ei) => {
-        if(Math.abs(b.x-e.x)<35 && Math.abs(b.y-e.y)<22) {
-          playSound(800, 0.1); ennemis.splice(ei,1); balles.splice(bi,1); score+=2;
-        }
-      });
-      if(boss && Math.abs(b.x-boss.x)<50 && Math.abs(b.y-boss.y)<25) {
-        boss.hp--; playSound(600, 0.2, 'square'); balles.splice(bi,1);
-        if(boss.hp <= 0) {
-          score += 20; boss = null;
-          setTimeout(() => { niveauActuel = 2; phase = 2; arbres = []; ennemis = []; }, 2000);
-        }
-      }
-    });
+
     score++;
     if(avion.y+40 > canvas.height || avion.y-40 < 0) gameOver();
     dessinerAvionRealiste();
   }
 
-  else if(niveauActuel == 2) {
-    phase = 2;
-    hudDiv.textContent = `Score: ${score} | Niveau: VOITURE`;
-    let sol = ctx.createLinearGradient(0, canvas.height-70, 0, canvas.height);
-    sol.addColorStop(0, '#8B4513'); sol.addColorStop(1, '#3E2723');
-    ctx.fillStyle = sol; ctx.fillRect(0, canvas.height-70, canvas.width, 70);
-    voiture.x += voiture.vx;
-    if(voiture.x < 45) voiture.x = 45;
-    if(voiture.x > canvas.width-45) voiture.x = canvas.width-45;
-    if(Math.random() < 0.02) mines.push({x: Math.random()*canvas.width, y: canvas.height-50});
-    mines.forEach(m => {
-      ctx.shadowBlur = 15; ctx.shadowColor = 'red';
-      ctx.fillStyle = 'black'; ctx.beginPath(); ctx.arc(m.x, m.y, 14, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = 'red'; ctx.fillRect(m.x-5, m.y-5, 10, 10); ctx.shadowBlur = 0;
-      if(Math.abs(m.x-voiture.x)<32) gameOver();
-    });
-    dessinerVoiture();
-    score += 0.5;
-    if(score >= 100) { niveauActuel = 3; score = 0; }
-  }
-
-  else if(niveauActuel == 3) {
-    phase = 3;
-    hudDiv.textContent = `Score: ${score} | Niveau: MOTO`;
-    ctx.fillStyle = '#555'; ctx.fillRect(0, canvas.height-60, canvas.width, 60);
-    moto.x += moto.vx;
-    if(moto.x < 35) moto.x = 35;
-    if(moto.x > canvas.width-35) moto.x = canvas.width-35;
-    if(Math.random() < 0.025) mines.push({x: Math.random()*canvas.width, y: canvas.height-40});
-    mines.forEach(m => {
-      ctx.fillStyle = 'orange'; ctx.fillRect(m.x-12, m.y-12, 24, 24);
-      if(Math.abs(m.x-moto.x)<30) gameOver();
-    });
-    dessinerMoto();
-    score += 0.7;
-    if(score >= 100) { niveauActuel = 4; score = 0; }
-  }
-
-  else if(niveauActuel == 4) {
-    phase = 4;
-    hudDiv.textContent = `Score: ${score} | Niveau: TENNIS`;
-    ctx.fillStyle = '#1E90FF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = 'white'; ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.moveTo(canvas.width/2, 0); ctx.lineTo(canvas.width/2, canvas.height); ctx.stroke();
-    ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(voiture.x, voiture.y, 15, 0, Math.PI*2); ctx.fill();
-    voiture.x += voiture.vx;
-    if(voiture.x < 20 || voiture.x > canvas.width-20) voiture.vx *= -1;
-    if(voiture.y < 20 || voiture.y > canvas.height-20) voiture.vy *= -1;
-    voiture.y += voiture.vy || 3;
-    ctx.fillStyle = 'white'; ctx.fillRect(canvas.width-30, avion.y-40, 10, 80);
-    avion.y += (voiture.y - avion.y) * 0.1;
-    if(Math.abs(voiture.x - (canvas.width-30)) < 25 && Math.abs(voiture.y - avion.y) < 40) {
-      score += 1; voiture.vx *= -1; playSound(400, 0.1);
-    }
-    if(score >= 50) { niveauActuel = 5; score = 0; }
-  }
-
-  else if(niveauActuel == 5) {
-    phase = 5;
-    hudDiv.textContent = `Score: ${score} | Niveau: ESPACE`;
+  // === AVION ESPACE NIVEAU 6 ===
+  else if(niveauActuel == 6) {
+    hudDiv.textContent = `Score: ${score} | AVION ESPACE`;
     ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    for(let i=0; i<100; i++) {
+    for(let i=0; i<150; i++) {
       ctx.fillStyle = 'white'; ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 2, 2);
     }
     dessinerAvionRealiste();
     avion.vy += gravite*0.5; avion.y += avion.vy;
+
+    // Ennemis dès le début
+    if(Math.random() < 0.04) {
+      ennemis.push({x: canvas.width, y: Math.random()*(canvas.height-100)+50});
+    }
+    ennemis.forEach(e => {
+      e.x -= vitesse+2;
+      dessinerEnnemi(e);
+      if(Math.abs(e.x-avion.x)<35 && Math.abs(e.y-avion.y)<28) gameOver();
+    });
+    ennemis = ennemis.filter(e => e.x > -60);
+
+    if(tirCooldown > 0) tirCooldown--;
+    balles.forEach(b => {
+      b.x += 14;
+      ctx.shadowBlur = 10; ctx.shadowColor = '#00FFFF';
+      ctx.fillStyle = '#00FFFF'; ctx.fillRect(b.x, b.y-2, 18, 4); ctx.shadowBlur = 0;
+    });
+    balles = balles.filter(b => b.x < canvas.width);
+    balles.forEach((b,bi) => {
+      ennemis.forEach((e,ei) => {
+        if(Math.abs(b.x-e.x)<35 && Math.abs(b.y-e.y)<22) {
+          playSound(800, 0.1); ennemis.splice(ei,1); balles.splice(bi,1); score+=3;
+        }
+      });
+    });
+
+    score += 2;
     if(avion.y+40 > canvas.height || avion.y-40 < 0) gameOver();
   }
 
@@ -530,7 +429,7 @@ function boucle() {
 }
 
 function tirer() {
-  if((phase==1 || phase==5) && tirCooldown==0) {
+  if(tirCooldown==0) {
     balles.push({x: avion.x+40, y: avion.y});
     playSound(900, 0.05, 'square');
     tirCooldown = 6;
@@ -540,22 +439,16 @@ function tirer() {
 function taper(e) {
   if(!jeuActif) return;
   let x = e.touches? e.touches[0].clientX : e.clientX;
-  if(phase==1 || phase==5) {
-    if(x < canvas.width/2) { avion.vy = -6.5; playSound(300, 0.05); }
-    else tirer();
-  } else if(phase==2) {
-    voiture.vx = x < canvas.width/2? -5 : 5;
-    setTimeout(()=>voiture.vx=0, 200);
-  } else if(phase==3) {
-    moto.vx = x < canvas.width/2? -6 : 6;
-    setTimeout(()=>moto.vx=0, 180);
-  } else if(phase==4) {
-    voiture.vx = x < canvas.width/2? -4 : 4;
+  if(x < canvas.width/2) {
+    avion.vy = -6.5;
+    playSound(300, 0.05);
+  } else {
+    tirer();
   }
 }
 
-// === MENU + RETOUR ===
-function ouvrirMenu() {
+// === MENU AVEC MOT DE PASSE ===
+function ouvrirMenuAvion() {
   startScreen.style.display = 'none';
   menuNiveaux.style.display = 'block';
 }
@@ -581,22 +474,30 @@ function startNiveau(niv) {
   menuNiveaux.style.display = 'none';
   startScreen.style.display = 'none';
   btnRetour.style.display = 'block';
-  niveauActuel = niv;
+
+  if(niv >= 1 && niv <= 5) {
+    niveauActuel = 1; // mode avion libre
+    sousNiveau = niv;
+  } else {
+    niveauActuel = 6; // mode espace
+    sousNiveau = 1;
+  }
+
   score = 0; vitesse = 2.3; gravite = 0.32;
   avion.y = canvas.height/2; avion.vy = 0;
-  arbres = []; ennemis = []; balles = []; mines = []; boss = null; fumee = [];
-  if(niv == 2) voiture.x = 100;
-  if(niv == 3) moto.x = 100;
+  arbres = []; ennemis = []; balles = []; fumee = [];
   boucle();
 }
+
 function retourMenu() {
   jeuActif = false;
   bgMusic.pause();
   bgMusic.currentTime = 0;
   btnRetour.style.display = 'none';
-  hudDiv.textContent = `Score: 0 | Niveau: MENU`;
-  ouvrirMenu();
+  hudDiv.textContent = `Score: 0 | MENU`;
+  fermerMenu();
 }
+
 function gameOver() {
   jeuActif = false;
   bgMusic.pause();
